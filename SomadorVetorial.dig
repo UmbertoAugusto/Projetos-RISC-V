@@ -1,0 +1,763 @@
+<?xml version="1.0" encoding="utf-8"?>
+<circuit>
+  <version>2</version>
+  <attributes/>
+  <visualElements>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>SumSubVetorial</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>A_i:32,B_i:32,mode_i,vecSize_i:2</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>S_o:32</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity SumSubVetorial is
+    Port (
+        A_i        : in  STD_LOGIC_VECTOR(31 downto 0);
+        B_i        : in  STD_LOGIC_VECTOR(31 downto 0);
+        mode_i     : in  STD_LOGIC; -- 0 soma / 1 subtrai
+        vecSize_i  : in  STD_LOGIC_VECTOR(1 downto 0);
+	S_o	   : out STD_LOGIC_VECTOR(31 downto 0)
+    );
+end SumSubVetorial;
+
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity Somador4bits is
+    Port (
+        A_i, B_i   : in  STD_LOGIC_VECTOR(3 downto 0);
+	C0	   : in STD_LOGIC;
+	S_o	   : out STD_LOGIC_VECTOR(3 downto 0);
+	P, G 	   : out STD_LOGIC
+    );
+end Somador4bits;
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity GeradorPropagadorCarry is
+    Port (
+        G0, G1, G2, G3, P0, P1, P2, P3, C0 : in  STD_LOGIC;
+        C1, C2, C3, C4 : out  STD_LOGIC
+    );
+end GeradorPropagadorCarry;
+
+architecture Behavioral of Somador4bits is
+
+signal G0, G1, G2, G3, P0, P1, P2, P3, C1, C2, C3 : STD_LOGIC;
+
+begin
+
+P0 &lt;= A_i(0) xor B_i(0);
+G0 &lt;= A_i(0) and B_i(0);
+
+P1 &lt;= A_i(1) xor B_i(1);
+G1 &lt;= A_i(1) and B_i(1);
+
+P2 &lt;= A_i(2) xor B_i(2);
+G2 &lt;= A_i(2) and B_i(2);
+
+P3 &lt;= A_i(3) xor B_i(3);
+G3 &lt;= A_i(3) and B_i(3);
+
+C1 &lt;= G0 or (P0 and C0);
+C2 &lt;= G1 or (P1 and G0) or (P1 and P0 and C0);
+C3 &lt;= G2 or (P2 and G1) or (P2 and P1 and G0) or (P2 and P1 and P0 and C0);
+
+P &lt;= P0 and P1 and P2 and P3;
+G &lt;= G3 or (P3 and G2) or (P3 and P2 and G1) or (P3 and P2 and P1 and G0) or (P3 and P2 and P1 and P0 and C0);
+
+S_o(0) &lt;= A_i(0) xor B_i(0) xor C0;
+S_o(1) &lt;= A_i(1) xor B_i(1) xor C1;
+S_o(2) &lt;= A_i(2) xor B_i(2) xor C2;
+S_o(3) &lt;= A_i(3) xor B_i(3) xor C3;
+
+end Behavioral;
+
+
+
+architecture Behavioral of GeradorPropagadorCarry is
+
+begin
+
+C1 &lt;= G0 or (P0 and C0);
+C2 &lt;= G1 or (P1 and G0) or (P1 and P0 and C0);
+C3 &lt;= G2 or (P2 and G1) or (P2 and P1 and G0) or (P2 and P1 and P0 and C0);
+C4 &lt;= G3 or (P3 and G2) or (P3 and P2 and G1) or (P3 and P2 and P1 and G0) or (P3 and P2 and P1 and P0 and C0);
+
+end Behavioral;
+
+
+
+architecture Behavioral of SumSubVetorial is
+
+component GeradorPropagadorCarry
+   Port (
+        G0, G1, G2, G3, P0, P1, P2, P3, C0 : in  STD_LOGIC;
+        C1, C2, C3, C4     : out  STD_LOGIC
+    	);
+end component;
+
+component Somador4bits is
+    Port (
+        A_i, B_i   : in  STD_LOGIC_VECTOR(3 downto 0);
+	C0	   : in STD_LOGIC;
+	S_o	   : out STD_LOGIC_VECTOR(3 downto 0);
+	P, G : out STD_LOGIC
+    );
+end component;
+
+signal B_signed, S_0_sig : STD_LOGIC_VECTOR(31 downto 0);
+signal G0_sig, G1_sig, G2_sig, G3_sig, P0_sig, P1_sig, P2_sig, P3_sig, C0_sig, C1_sig, C2_sig, C3_sig, C4_sig : STD_LOGIC;
+signal G4_sig, G5_sig, G6_sig, G7_sig, P4_sig, P5_sig, P6_sig, P7_sig, C5_sig, C6_sig, C7_sig, C8_sig : STD_LOGIC;
+
+begin
+
+	process(A_i, B_i, mode_i)
+	begin
+		if mode_i = &apos;0&apos; then
+			B_signed &lt;= B_i;
+		else
+			B_signed &lt;= not B_i; --o +1 vai ser adicionado como carry in
+		end if;
+	end process;
+
+SUM1: Somador4bits
+    port map (
+        	A_i =&gt; A_i(3 downto 0),
+		B_i =&gt; B_signed(3 downto 0),
+		C0  =&gt; mode_i,
+		S_o =&gt; S_0_sig(3 downto 0),
+		P   =&gt; P0_sig,
+		G   =&gt; G0_sig
+    		);
+
+SUM2: Somador4bits
+    port map (
+        	A_i =&gt; A_i(7 downto 4),
+		B_i =&gt; B_signed(7 downto 4),
+		C0  =&gt; (C1_sig and (vecSize_i(0) or vecSize_i(1))) or (mode_i and (vecSize_i(0) nor  vecSize_i(1))),
+		S_o =&gt; S_0_sig(7 downto 4),
+		P   =&gt; P1_sig,
+		G   =&gt; G1_sig
+    		);
+
+SUM3: Somador4bits
+    port map (
+        	A_i =&gt; A_i(11 downto 8),
+		B_i =&gt; B_signed(11 downto 8),
+		C0  =&gt; (C2_sig and vecSize_i(1)) or (mode_i and (not vecSize_i(1))),
+		S_o =&gt; S_0_sig(11 downto 8),
+		P   =&gt; P2_sig,
+		G   =&gt; G2_sig
+    		);
+
+SUM4: Somador4bits
+    port map (
+        	A_i =&gt; A_i(15 downto 12),
+		B_i =&gt; B_signed(15 downto 12),
+		C0  =&gt; (C3_sig and (vecSize_i(0) or vecSize_i(1))) or (mode_i and (vecSize_i(0) nor  vecSize_i(1))),
+		S_o =&gt; S_0_sig(15 downto 12),
+		P   =&gt; P3_sig,
+		G   =&gt; G3_sig
+    		);
+
+SUM5: Somador4bits
+    port map (
+        	A_i =&gt; A_i(19 downto 16),
+		B_i =&gt; B_signed(19 downto 16),
+		C0  =&gt; (C4_sig and vecSize_i(0) and vecSize_i(1)) or (mode_i and (vecSize_i(0) nand  vecSize_i(1))),
+		S_o =&gt; S_0_sig(19 downto 16),
+		P   =&gt; P4_sig,
+		G   =&gt; G4_sig
+    		);
+
+SUM6: Somador4bits
+    port map (
+        	A_i =&gt; A_i(23 downto 20),
+		B_i =&gt; B_signed(23 downto 20),
+		C0  =&gt; (C5_sig and (vecSize_i(0) or vecSize_i(1))) or (mode_i and (vecSize_i(0) nor  vecSize_i(1))),
+		S_o =&gt; S_0_sig(23 downto 20),
+		P   =&gt; P5_sig,
+		G   =&gt; G5_sig
+    		);
+
+SUM7: Somador4bits
+    port map (
+        	A_i =&gt; A_i(27 downto 24),
+		B_i =&gt; B_signed(27 downto 24),
+		C0  =&gt; (C6_sig and vecSize_i(1)) or (mode_i and (not vecSize_i(1))),
+		S_o =&gt; S_0_sig(27 downto 24),
+		P   =&gt; P6_sig,
+		G   =&gt; G6_sig
+    		);
+
+SUM8: Somador4bits
+    port map (
+        	A_i =&gt; A_i(31 downto 28),
+		B_i =&gt; B_signed(31 downto 28),
+		C0  =&gt; (C7_sig and (vecSize_i(0) or vecSize_i(1))) or (mode_i and (vecSize_i(0) nor  vecSize_i(1))),
+		S_o =&gt; S_0_sig(31 downto 28),
+		P   =&gt; P7_sig,
+		G   =&gt; G7_sig
+    		);
+
+GPC1: GeradorPropagadorCarry
+	port map (
+		G0 =&gt; G0_sig,
+		G1 =&gt; G1_sig,
+		G2 =&gt; G2_sig,
+		G3 =&gt; G3_sig,
+		P0 =&gt; P0_sig,
+		P1 =&gt; P1_sig,
+		P2 =&gt; P2_sig,
+		P3 =&gt; P3_sig,
+		C0 =&gt; C0_sig,
+		C1 =&gt; C1_sig,
+		C2 =&gt; C2_sig,
+		C3 =&gt; C3_sig,
+		C4 =&gt; C4_sig
+		);
+
+GPC2: GeradorPropagadorCarry
+	port map (
+		G0 =&gt; G4_sig,
+		G1 =&gt; G5_sig,
+		G2 =&gt; G6_sig,
+		G3 =&gt; G7_sig,
+		P0 =&gt; P4_sig,
+		P1 =&gt; P5_sig,
+		P2 =&gt; P6_sig,
+		P3 =&gt; P7_sig,
+		C0 =&gt; C4_sig,
+		C1 =&gt; C5_sig,
+		C2 =&gt; C6_sig,
+		C3 =&gt; C7_sig,
+		C4 =&gt; C8_sig
+		);
+
+S_o &lt;= S_0_sig;
+
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>6</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-20" y="520"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>GeradorPropagadorCarry</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>G0,G1,G2,G3,P0,P1,P2,P3,C0</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity GeradorPropagadorCarry is
+    Port (
+        G0, G1, G2, G3, P0, P1, P2, P3, C0 : in  STD_LOGIC;
+        C1, C2, C3, C4     : out  STD_LOGIC
+    );
+end GeradorPropagadorCarry;
+
+architecture Behavioral of GeradorPropagadorCarry is
+
+begin
+
+C1 &lt;= G0 or (P0 and C0);
+C2 &lt;= G1 or (P1 and G0) or (P1 and P0 and C0);
+C3 &lt;= G2 or (P2 and G1) or (P2 and P1 and G0) or (P2 and P1 and P0 and C0);
+C4 &lt;= G3 or (P3 and G2) or (P3 and P2 and G1) or (P3 and P2 and P1 and G0) or (P3 and P2 and P1 and P0 and C0);
+
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>C1,C2,C3,C4</string>
+        </entry>
+      </elementAttributes>
+      <pos x="140" y="-160"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>GeradorPropagadorCarry</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>G0,G1,G2,G3,P0,P1,P2,P3,C0</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity GeradorPropagadorCarry is
+    Port (
+        G0, G1, G2, G3, P0, P1, P2, P3, C0 : in  STD_LOGIC;
+        C1, C2, C3, C4     : out  STD_LOGIC
+    );
+end GeradorPropagadorCarry;
+
+architecture Behavioral of GeradorPropagadorCarry is
+
+begin
+
+C1 &lt;= G0 or (P0 and C0);
+C2 &lt;= G1 or (P1 and G0) or (P1 and P0 and C0);
+C3 &lt;= G2 or (P2 and G1) or (P2 and P1 and G0) or (P2 and P1 and P0 and C0);
+C4 &lt;= G3 or (P3 and G2) or (P3 and P2 and G1) or (P3 and P2 and P1 and G0) or (P3 and P2 and P1 and P0 and C0);
+
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>C1,C2,C3,C4</string>
+        </entry>
+      </elementAttributes>
+      <pos x="140" y="80"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>Somador4bits</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>A_i:4,B_i:4,C0</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity Somador4bits is
+    Port (
+        A_i, B_i   : in  STD_LOGIC_VECTOR(3 downto 0);
+	C0	   : in STD_LOGIC;
+	S_o	   : out STD_LOGIC_VECTOR(3 downto 0);
+	P, G : out STD_LOGIC
+    );
+end Somador4bits;
+
+architecture Behavioral of Somador4bits is
+
+signal G0, G1, G2, G3, P0, P1, P2, P3, C1, C2, C3 : STD_LOGIC;
+
+begin
+
+P0 &lt;= A_i(0) xor B_i(0);
+G0 &lt;= A_i(0) and B_i(0);
+
+P1 &lt;= A_i(1) xor B_i(1);
+G1 &lt;= A_i(1) and B_i(1);
+
+P2 &lt;= A_i(2) xor B_i(2);
+G2 &lt;= A_i(2) and B_i(2);
+
+P3 &lt;= A_i(3) xor B_i(3);
+G3 &lt;= A_i(3) and B_i(3);
+
+C1 &lt;= G0 or (P0 and C0);
+C2 &lt;= G1 or (P1 and G0) or (P1 and P0 and C0);
+C3 &lt;= G2 or (P2 and G1) or (P2 and P1 and G0) or (P2 and P1 and P0 and C0);
+
+P &lt;= P0 and P1 and P2 and P3;
+G &lt;= G3 or (P3 and G2) or (P3 and P2 and G1) or (P3 and P2 and P1 and G0) or (P3 and P2 and P1 and P0 and C0);
+
+S_o(0) &lt;= A_i(0) xor B_i(0) xor C0;
+S_o(1) &lt;= A_i(1) xor B_i(1) xor C1;
+S_o(2) &lt;= A_i(2) xor B_i(2) xor C2;
+S_o(3) &lt;= A_i(3) xor B_i(3) xor C3;
+
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>S_o:4,P,G</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-540" y="140"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Bits</string>
+          <int>4</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-720" y="140"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Bits</string>
+          <int>4</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-900" y="200"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes/>
+      <pos x="-700" y="260"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Bits</string>
+          <int>4</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-260" y="40"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes/>
+      <pos x="-240" y="180"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes/>
+      <pos x="-260" y="260"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes/>
+      <pos x="-100" y="-120"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-180" y="500"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-180" y="540"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes/>
+      <pos x="-180" y="580"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+        <entry>
+          <string>intFormat</string>
+          <intFormat>dec</intFormat>
+        </entry>
+      </elementAttributes>
+      <pos x="220" y="560"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Bits</string>
+          <int>2</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-180" y="620"/>
+    </visualElement>
+  </visualElements>
+  <wires>
+    <wire>
+      <p1 x="20" y="0"/>
+      <p2 x="140" y="0"/>
+    </wire>
+    <wire>
+      <p1 x="-700" y="260"/>
+      <p2 x="-540" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="-180" y="580"/>
+      <p2 x="-20" y="580"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="200"/>
+      <p2 x="140" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="-60" y="520"/>
+      <p2 x="-20" y="520"/>
+    </wire>
+    <wire>
+      <p1 x="40" y="-140"/>
+      <p2 x="140" y="-140"/>
+    </wire>
+    <wire>
+      <p1 x="-720" y="140"/>
+      <p2 x="-540" y="140"/>
+    </wire>
+    <wire>
+      <p1 x="-480" y="140"/>
+      <p2 x="-260" y="140"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="140"/>
+      <p2 x="140" y="140"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="-80"/>
+      <p2 x="140" y="-80"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="80"/>
+      <p2 x="140" y="80"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="-20"/>
+      <p2 x="140" y="-20"/>
+    </wire>
+    <wire>
+      <p1 x="-60" y="600"/>
+      <p2 x="-20" y="600"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="220"/>
+      <p2 x="140" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-180" y="540"/>
+      <p2 x="-20" y="540"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="-160"/>
+      <p2 x="140" y="-160"/>
+    </wire>
+    <wire>
+      <p1 x="-900" y="160"/>
+      <p2 x="-540" y="160"/>
+    </wire>
+    <wire>
+      <p1 x="-480" y="160"/>
+      <p2 x="-240" y="160"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="160"/>
+      <p2 x="140" y="160"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="-100"/>
+      <p2 x="140" y="-100"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="100"/>
+      <p2 x="140" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="-40"/>
+      <p2 x="140" y="-40"/>
+    </wire>
+    <wire>
+      <p1 x="-180" y="620"/>
+      <p2 x="-60" y="620"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="240"/>
+      <p2 x="140" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="100" y="560"/>
+      <p2 x="220" y="560"/>
+    </wire>
+    <wire>
+      <p1 x="-480" y="180"/>
+      <p2 x="-260" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="180"/>
+      <p2 x="140" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="-180" y="500"/>
+      <p2 x="-60" y="500"/>
+    </wire>
+    <wire>
+      <p1 x="-100" y="-120"/>
+      <p2 x="20" y="-120"/>
+    </wire>
+    <wire>
+      <p1 x="40" y="-120"/>
+      <p2 x="140" y="-120"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="-120"/>
+      <p2 x="40" y="-120"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="120"/>
+      <p2 x="140" y="120"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="-60"/>
+      <p2 x="140" y="-60"/>
+    </wire>
+    <wire>
+      <p1 x="-900" y="160"/>
+      <p2 x="-900" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="-260" y="40"/>
+      <p2 x="-260" y="140"/>
+    </wire>
+    <wire>
+      <p1 x="-260" y="180"/>
+      <p2 x="-260" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="-160"/>
+      <p2 x="20" y="-120"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="-100"/>
+      <p2 x="20" y="-80"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="160"/>
+      <p2 x="20" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="-80"/>
+      <p2 x="20" y="-60"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="180"/>
+      <p2 x="20" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="-60"/>
+      <p2 x="20" y="-40"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="200"/>
+      <p2 x="20" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="80"/>
+      <p2 x="20" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="-40"/>
+      <p2 x="20" y="-20"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="220"/>
+      <p2 x="20" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="100"/>
+      <p2 x="20" y="120"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="-20"/>
+      <p2 x="20" y="0"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="120"/>
+      <p2 x="20" y="140"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="0"/>
+      <p2 x="20" y="80"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="-120"/>
+      <p2 x="20" y="-100"/>
+    </wire>
+    <wire>
+      <p1 x="20" y="140"/>
+      <p2 x="20" y="160"/>
+    </wire>
+    <wire>
+      <p1 x="40" y="-140"/>
+      <p2 x="40" y="-120"/>
+    </wire>
+    <wire>
+      <p1 x="-540" y="180"/>
+      <p2 x="-540" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="-60" y="500"/>
+      <p2 x="-60" y="520"/>
+    </wire>
+    <wire>
+      <p1 x="-60" y="600"/>
+      <p2 x="-60" y="620"/>
+    </wire>
+    <wire>
+      <p1 x="-240" y="160"/>
+      <p2 x="-240" y="180"/>
+    </wire>
+  </wires>
+  <measurementOrdering/>
+</circuit>
