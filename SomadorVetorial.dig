@@ -129,7 +129,7 @@ component Somador4bits is
 end component;
 
 signal B_signed, S_0_sig : STD_LOGIC_VECTOR(31 downto 0);
-signal G0_sig, G1_sig, G2_sig, G3_sig, P0_sig, P1_sig, P2_sig, P3_sig, C0_sig, C1_sig, C2_sig, C3_sig, C4_sig : STD_LOGIC;
+signal G0_sig, G1_sig, G2_sig, G3_sig, P0_sig, P1_sig, P2_sig, P3_sig, C1_sig, C2_sig, C3_sig, C4_sig : STD_LOGIC;
 signal G4_sig, G5_sig, G6_sig, G7_sig, P4_sig, P5_sig, P6_sig, P7_sig, C5_sig, C6_sig, C7_sig, C8_sig : STD_LOGIC;
 
 begin
@@ -233,7 +233,7 @@ GPC1: GeradorPropagadorCarry
 		P1 =&gt; P1_sig,
 		P2 =&gt; P2_sig,
 		P3 =&gt; P3_sig,
-		C0 =&gt; C0_sig,
+		C0 =&gt; mode_i,
 		C1 =&gt; C1_sig,
 		C2 =&gt; C2_sig,
 		C3 =&gt; C3_sig,
@@ -266,218 +266,7 @@ end Behavioral;</string>
           <int>6</int>
         </entry>
       </elementAttributes>
-      <pos x="-20" y="520"/>
-    </visualElement>
-    <visualElement>
-      <elementName>External</elementName>
-      <elementAttributes>
-        <entry>
-          <string>applicationType</string>
-          <appType>GHDL</appType>
-        </entry>
-        <entry>
-          <string>Label</string>
-          <string>GeradorPropagadorCarry</string>
-        </entry>
-        <entry>
-          <string>externalInputs</string>
-          <string>G0,G1,G2,G3,P0,P1,P2,P3,C0</string>
-        </entry>
-        <entry>
-          <string>Code</string>
-          <string>library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
-
-entity GeradorPropagadorCarry is
-    Port (
-        G0, G1, G2, G3, P0, P1, P2, P3, C0 : in  STD_LOGIC;
-        C1, C2, C3, C4     : out  STD_LOGIC
-    );
-end GeradorPropagadorCarry;
-
-architecture Behavioral of GeradorPropagadorCarry is
-
-begin
-
-C1 &lt;= G0 or (P0 and C0);
-C2 &lt;= G1 or (P1 and G0) or (P1 and P0 and C0);
-C3 &lt;= G2 or (P2 and G1) or (P2 and P1 and G0) or (P2 and P1 and P0 and C0);
-C4 &lt;= G3 or (P3 and G2) or (P3 and P2 and G1) or (P3 and P2 and P1 and G0) or (P3 and P2 and P1 and P0 and C0);
-
-end Behavioral;</string>
-        </entry>
-        <entry>
-          <string>externalOutputs</string>
-          <string>C1,C2,C3,C4</string>
-        </entry>
-      </elementAttributes>
-      <pos x="140" y="-160"/>
-    </visualElement>
-    <visualElement>
-      <elementName>External</elementName>
-      <elementAttributes>
-        <entry>
-          <string>applicationType</string>
-          <appType>GHDL</appType>
-        </entry>
-        <entry>
-          <string>Label</string>
-          <string>GeradorPropagadorCarry</string>
-        </entry>
-        <entry>
-          <string>externalInputs</string>
-          <string>G0,G1,G2,G3,P0,P1,P2,P3,C0</string>
-        </entry>
-        <entry>
-          <string>Code</string>
-          <string>library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
-
-entity GeradorPropagadorCarry is
-    Port (
-        G0, G1, G2, G3, P0, P1, P2, P3, C0 : in  STD_LOGIC;
-        C1, C2, C3, C4     : out  STD_LOGIC
-    );
-end GeradorPropagadorCarry;
-
-architecture Behavioral of GeradorPropagadorCarry is
-
-begin
-
-C1 &lt;= G0 or (P0 and C0);
-C2 &lt;= G1 or (P1 and G0) or (P1 and P0 and C0);
-C3 &lt;= G2 or (P2 and G1) or (P2 and P1 and G0) or (P2 and P1 and P0 and C0);
-C4 &lt;= G3 or (P3 and G2) or (P3 and P2 and G1) or (P3 and P2 and P1 and G0) or (P3 and P2 and P1 and P0 and C0);
-
-end Behavioral;</string>
-        </entry>
-        <entry>
-          <string>externalOutputs</string>
-          <string>C1,C2,C3,C4</string>
-        </entry>
-      </elementAttributes>
-      <pos x="140" y="80"/>
-    </visualElement>
-    <visualElement>
-      <elementName>External</elementName>
-      <elementAttributes>
-        <entry>
-          <string>applicationType</string>
-          <appType>GHDL</appType>
-        </entry>
-        <entry>
-          <string>Label</string>
-          <string>Somador4bits</string>
-        </entry>
-        <entry>
-          <string>externalInputs</string>
-          <string>A_i:4,B_i:4,C0</string>
-        </entry>
-        <entry>
-          <string>Code</string>
-          <string>library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
-
-entity Somador4bits is
-    Port (
-        A_i, B_i   : in  STD_LOGIC_VECTOR(3 downto 0);
-	C0	   : in STD_LOGIC;
-	S_o	   : out STD_LOGIC_VECTOR(3 downto 0);
-	P, G : out STD_LOGIC
-    );
-end Somador4bits;
-
-architecture Behavioral of Somador4bits is
-
-signal G0, G1, G2, G3, P0, P1, P2, P3, C1, C2, C3 : STD_LOGIC;
-
-begin
-
-P0 &lt;= A_i(0) xor B_i(0);
-G0 &lt;= A_i(0) and B_i(0);
-
-P1 &lt;= A_i(1) xor B_i(1);
-G1 &lt;= A_i(1) and B_i(1);
-
-P2 &lt;= A_i(2) xor B_i(2);
-G2 &lt;= A_i(2) and B_i(2);
-
-P3 &lt;= A_i(3) xor B_i(3);
-G3 &lt;= A_i(3) and B_i(3);
-
-C1 &lt;= G0 or (P0 and C0);
-C2 &lt;= G1 or (P1 and G0) or (P1 and P0 and C0);
-C3 &lt;= G2 or (P2 and G1) or (P2 and P1 and G0) or (P2 and P1 and P0 and C0);
-
-P &lt;= P0 and P1 and P2 and P3;
-G &lt;= G3 or (P3 and G2) or (P3 and P2 and G1) or (P3 and P2 and P1 and G0) or (P3 and P2 and P1 and P0 and C0);
-
-S_o(0) &lt;= A_i(0) xor B_i(0) xor C0;
-S_o(1) &lt;= A_i(1) xor B_i(1) xor C1;
-S_o(2) &lt;= A_i(2) xor B_i(2) xor C2;
-S_o(3) &lt;= A_i(3) xor B_i(3) xor C3;
-
-end Behavioral;</string>
-        </entry>
-        <entry>
-          <string>externalOutputs</string>
-          <string>S_o:4,P,G</string>
-        </entry>
-      </elementAttributes>
-      <pos x="-540" y="140"/>
-    </visualElement>
-    <visualElement>
-      <elementName>In</elementName>
-      <elementAttributes>
-        <entry>
-          <string>Bits</string>
-          <int>4</int>
-        </entry>
-      </elementAttributes>
-      <pos x="-720" y="140"/>
-    </visualElement>
-    <visualElement>
-      <elementName>In</elementName>
-      <elementAttributes>
-        <entry>
-          <string>Bits</string>
-          <int>4</int>
-        </entry>
-      </elementAttributes>
-      <pos x="-900" y="200"/>
-    </visualElement>
-    <visualElement>
-      <elementName>In</elementName>
-      <elementAttributes/>
-      <pos x="-700" y="260"/>
-    </visualElement>
-    <visualElement>
-      <elementName>Out</elementName>
-      <elementAttributes>
-        <entry>
-          <string>Bits</string>
-          <int>4</int>
-        </entry>
-      </elementAttributes>
-      <pos x="-260" y="40"/>
-    </visualElement>
-    <visualElement>
-      <elementName>Out</elementName>
-      <elementAttributes/>
-      <pos x="-240" y="180"/>
-    </visualElement>
-    <visualElement>
-      <elementName>Out</elementName>
-      <elementAttributes/>
-      <pos x="-260" y="260"/>
-    </visualElement>
-    <visualElement>
-      <elementName>In</elementName>
-      <elementAttributes/>
-      <pos x="-100" y="-120"/>
+      <pos x="-200" y="100"/>
     </visualElement>
     <visualElement>
       <elementName>In</elementName>
@@ -487,7 +276,7 @@ end Behavioral;</string>
           <int>32</int>
         </entry>
       </elementAttributes>
-      <pos x="-180" y="500"/>
+      <pos x="-360" y="80"/>
     </visualElement>
     <visualElement>
       <elementName>In</elementName>
@@ -497,12 +286,12 @@ end Behavioral;</string>
           <int>32</int>
         </entry>
       </elementAttributes>
-      <pos x="-180" y="540"/>
+      <pos x="-360" y="120"/>
     </visualElement>
     <visualElement>
       <elementName>In</elementName>
       <elementAttributes/>
-      <pos x="-180" y="580"/>
+      <pos x="-360" y="160"/>
     </visualElement>
     <visualElement>
       <elementName>Out</elementName>
@@ -516,7 +305,7 @@ end Behavioral;</string>
           <intFormat>dec</intFormat>
         </entry>
       </elementAttributes>
-      <pos x="220" y="560"/>
+      <pos x="40" y="140"/>
     </visualElement>
     <visualElement>
       <elementName>In</elementName>
@@ -526,237 +315,45 @@ end Behavioral;</string>
           <int>2</int>
         </entry>
       </elementAttributes>
-      <pos x="-180" y="620"/>
+      <pos x="-360" y="200"/>
     </visualElement>
   </visualElements>
   <wires>
     <wire>
-      <p1 x="20" y="0"/>
-      <p2 x="140" y="0"/>
+      <p1 x="-360" y="160"/>
+      <p2 x="-200" y="160"/>
     </wire>
     <wire>
-      <p1 x="-700" y="260"/>
-      <p2 x="-540" y="260"/>
+      <p1 x="-360" y="80"/>
+      <p2 x="-240" y="80"/>
     </wire>
     <wire>
-      <p1 x="-180" y="580"/>
-      <p2 x="-20" y="580"/>
+      <p1 x="-240" y="100"/>
+      <p2 x="-200" y="100"/>
     </wire>
     <wire>
-      <p1 x="20" y="200"/>
-      <p2 x="140" y="200"/>
+      <p1 x="-240" y="180"/>
+      <p2 x="-200" y="180"/>
     </wire>
     <wire>
-      <p1 x="-60" y="520"/>
-      <p2 x="-20" y="520"/>
+      <p1 x="-360" y="120"/>
+      <p2 x="-200" y="120"/>
     </wire>
     <wire>
-      <p1 x="40" y="-140"/>
-      <p2 x="140" y="-140"/>
+      <p1 x="-360" y="200"/>
+      <p2 x="-240" y="200"/>
     </wire>
     <wire>
-      <p1 x="-720" y="140"/>
-      <p2 x="-540" y="140"/>
+      <p1 x="-80" y="140"/>
+      <p2 x="40" y="140"/>
     </wire>
     <wire>
-      <p1 x="-480" y="140"/>
-      <p2 x="-260" y="140"/>
+      <p1 x="-240" y="80"/>
+      <p2 x="-240" y="100"/>
     </wire>
     <wire>
-      <p1 x="20" y="140"/>
-      <p2 x="140" y="140"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="-80"/>
-      <p2 x="140" y="-80"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="80"/>
-      <p2 x="140" y="80"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="-20"/>
-      <p2 x="140" y="-20"/>
-    </wire>
-    <wire>
-      <p1 x="-60" y="600"/>
-      <p2 x="-20" y="600"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="220"/>
-      <p2 x="140" y="220"/>
-    </wire>
-    <wire>
-      <p1 x="-180" y="540"/>
-      <p2 x="-20" y="540"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="-160"/>
-      <p2 x="140" y="-160"/>
-    </wire>
-    <wire>
-      <p1 x="-900" y="160"/>
-      <p2 x="-540" y="160"/>
-    </wire>
-    <wire>
-      <p1 x="-480" y="160"/>
-      <p2 x="-240" y="160"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="160"/>
-      <p2 x="140" y="160"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="-100"/>
-      <p2 x="140" y="-100"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="100"/>
-      <p2 x="140" y="100"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="-40"/>
-      <p2 x="140" y="-40"/>
-    </wire>
-    <wire>
-      <p1 x="-180" y="620"/>
-      <p2 x="-60" y="620"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="240"/>
-      <p2 x="140" y="240"/>
-    </wire>
-    <wire>
-      <p1 x="100" y="560"/>
-      <p2 x="220" y="560"/>
-    </wire>
-    <wire>
-      <p1 x="-480" y="180"/>
-      <p2 x="-260" y="180"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="180"/>
-      <p2 x="140" y="180"/>
-    </wire>
-    <wire>
-      <p1 x="-180" y="500"/>
-      <p2 x="-60" y="500"/>
-    </wire>
-    <wire>
-      <p1 x="-100" y="-120"/>
-      <p2 x="20" y="-120"/>
-    </wire>
-    <wire>
-      <p1 x="40" y="-120"/>
-      <p2 x="140" y="-120"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="-120"/>
-      <p2 x="40" y="-120"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="120"/>
-      <p2 x="140" y="120"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="-60"/>
-      <p2 x="140" y="-60"/>
-    </wire>
-    <wire>
-      <p1 x="-900" y="160"/>
-      <p2 x="-900" y="200"/>
-    </wire>
-    <wire>
-      <p1 x="-260" y="40"/>
-      <p2 x="-260" y="140"/>
-    </wire>
-    <wire>
-      <p1 x="-260" y="180"/>
-      <p2 x="-260" y="260"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="-160"/>
-      <p2 x="20" y="-120"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="-100"/>
-      <p2 x="20" y="-80"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="160"/>
-      <p2 x="20" y="180"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="-80"/>
-      <p2 x="20" y="-60"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="180"/>
-      <p2 x="20" y="200"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="-60"/>
-      <p2 x="20" y="-40"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="200"/>
-      <p2 x="20" y="220"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="80"/>
-      <p2 x="20" y="100"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="-40"/>
-      <p2 x="20" y="-20"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="220"/>
-      <p2 x="20" y="240"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="100"/>
-      <p2 x="20" y="120"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="-20"/>
-      <p2 x="20" y="0"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="120"/>
-      <p2 x="20" y="140"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="0"/>
-      <p2 x="20" y="80"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="-120"/>
-      <p2 x="20" y="-100"/>
-    </wire>
-    <wire>
-      <p1 x="20" y="140"/>
-      <p2 x="20" y="160"/>
-    </wire>
-    <wire>
-      <p1 x="40" y="-140"/>
-      <p2 x="40" y="-120"/>
-    </wire>
-    <wire>
-      <p1 x="-540" y="180"/>
-      <p2 x="-540" y="260"/>
-    </wire>
-    <wire>
-      <p1 x="-60" y="500"/>
-      <p2 x="-60" y="520"/>
-    </wire>
-    <wire>
-      <p1 x="-60" y="600"/>
-      <p2 x="-60" y="620"/>
-    </wire>
-    <wire>
-      <p1 x="-240" y="160"/>
-      <p2 x="-240" y="180"/>
+      <p1 x="-240" y="180"/>
+      <p2 x="-240" y="200"/>
     </wire>
   </wires>
   <measurementOrdering/>
