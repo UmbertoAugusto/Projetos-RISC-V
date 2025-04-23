@@ -103,7 +103,7 @@ component Somador4bits is
 end component;
 
 signal B_signed, S_0_sig : STD_LOGIC_VECTOR(31 downto 0);
-signal G0_sig, G1_sig, G2_sig, G3_sig, P0_sig, P1_sig, P2_sig, P3_sig, C0_sig, C1_sig, C2_sig, C3_sig, C4_sig : STD_LOGIC;
+signal G0_sig, G1_sig, G2_sig, G3_sig, P0_sig, P1_sig, P2_sig, P3_sig, C1_sig, C2_sig, C3_sig, C4_sig : STD_LOGIC;
 signal G4_sig, G5_sig, G6_sig, G7_sig, P4_sig, P5_sig, P6_sig, P7_sig, C5_sig, C6_sig, C7_sig, C8_sig : STD_LOGIC;
 
 begin
@@ -207,7 +207,7 @@ GPC1: GeradorPropagadorCarry
 		P1 => P1_sig,
 		P2 => P2_sig,
 		P3 => P3_sig,
-		C0 => C0_sig,
+		C0 => mode_i,
 		C1 => C1_sig,
 		C2 => C2_sig,
 		C3 => C3_sig,
