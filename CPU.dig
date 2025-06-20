@@ -15,21 +15,21 @@
           <int>32</int>
         </entry>
       </elementAttributes>
-      <pos x="-780" y="140"/>
+      <pos x="-1640" y="280"/>
     </visualElement>
     <visualElement>
       <elementName>Multiplexer</elementName>
       <elementAttributes>
         <entry>
-          <string>Bits</string>
-          <int>32</int>
-        </entry>
-        <entry>
           <string>Selector Bits</string>
           <int>2</int>
         </entry>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
       </elementAttributes>
-      <pos x="-920" y="140"/>
+      <pos x="-1780" y="280"/>
     </visualElement>
     <visualElement>
       <elementName>In</elementName>
@@ -43,28 +43,18 @@
           <string>Clock</string>
         </entry>
       </elementAttributes>
-      <pos x="-840" y="460"/>
-    </visualElement>
-    <visualElement>
-      <elementName>Out</elementName>
-      <elementAttributes>
-        <entry>
-          <string>Bits</string>
-          <int>16</int>
-        </entry>
-      </elementAttributes>
-      <pos x="-400" y="-20"/>
+      <pos x="-1700" y="400"/>
     </visualElement>
     <visualElement>
       <elementName>External</elementName>
       <elementAttributes>
         <entry>
-          <string>Label</string>
-          <string>PCPlusFour</string>
-        </entry>
-        <entry>
           <string>applicationType</string>
           <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>PCPlusFour</string>
         </entry>
         <entry>
           <string>externalInputs</string>
@@ -97,7 +87,7 @@ end Behavioral;</string>
           <int>7</int>
         </entry>
       </elementAttributes>
-      <pos x="-620" y="-20"/>
+      <pos x="-1720" y="160"/>
     </visualElement>
     <visualElement>
       <elementName>In</elementName>
@@ -107,7 +97,7 @@ end Behavioral;</string>
           <string>VemDoIDStage</string>
         </entry>
       </elementAttributes>
-      <pos x="-1060" y="160"/>
+      <pos x="-1900" y="300"/>
     </visualElement>
     <visualElement>
       <elementName>In</elementName>
@@ -117,7 +107,7 @@ end Behavioral;</string>
           <string>VemDoEXStage</string>
         </entry>
       </elementAttributes>
-      <pos x="-1060" y="220"/>
+      <pos x="-1900" y="360"/>
     </visualElement>
     <visualElement>
       <elementName>In</elementName>
@@ -131,17 +121,21 @@ end Behavioral;</string>
           <int>2</int>
         </entry>
       </elementAttributes>
-      <pos x="-1040" y="300"/>
+      <pos x="-1780" y="420"/>
     </visualElement>
     <visualElement>
       <elementName>Out</elementName>
       <elementAttributes>
         <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
           <string>Label</string>
           <string>VaiVirarInstMem</string>
         </entry>
       </elementAttributes>
-      <pos x="-620" y="120"/>
+      <pos x="-1480" y="280"/>
     </visualElement>
     <visualElement>
       <elementName>External</elementName>
@@ -186,18 +180,18 @@ end Behavioral;</string>
           <int>7</int>
         </entry>
       </elementAttributes>
-      <pos x="-460" y="-160"/>
+      <pos x="-840" y="60"/>
     </visualElement>
     <visualElement>
       <elementName>External</elementName>
       <elementAttributes>
         <entry>
-          <string>Label</string>
-          <string>CheckEquality</string>
-        </entry>
-        <entry>
           <string>applicationType</string>
           <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>CheckEquality</string>
         </entry>
         <entry>
           <string>externalInputs</string>
@@ -231,18 +225,18 @@ end Behavioral;</string>
           <int>5</int>
         </entry>
       </elementAttributes>
-      <pos x="-1060" y="-180"/>
+      <pos x="-560" y="240"/>
     </visualElement>
     <visualElement>
       <elementName>External</elementName>
       <elementAttributes>
         <entry>
-          <string>Label</string>
-          <string>ImmGen</string>
-        </entry>
-        <entry>
           <string>applicationType</string>
           <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>ImmGen</string>
         </entry>
         <entry>
           <string>externalInputs</string>
@@ -326,7 +320,7 @@ end Behavioral;</string>
           <int>11</int>
         </entry>
       </elementAttributes>
-      <pos x="-180" y="-240"/>
+      <pos x="-960" y="500"/>
     </visualElement>
     <visualElement>
       <elementName>In</elementName>
@@ -340,35 +334,7 @@ end Behavioral;</string>
           <string>PCWrite</string>
         </entry>
       </elementAttributes>
-      <pos x="-800" y="240"/>
-    </visualElement>
-    <visualElement>
-      <elementName>In</elementName>
-      <elementAttributes>
-        <entry>
-          <string>Label</string>
-          <string>IF/ID.Instruction</string>
-        </entry>
-        <entry>
-          <string>Bits</string>
-          <int>32</int>
-        </entry>
-      </elementAttributes>
-      <pos x="-280" y="-240"/>
-    </visualElement>
-    <visualElement>
-      <elementName>Out</elementName>
-      <elementAttributes>
-        <entry>
-          <string>Label</string>
-          <string>Imediato</string>
-        </entry>
-        <entry>
-          <string>Bits</string>
-          <int>32</int>
-        </entry>
-      </elementAttributes>
-      <pos x="80" y="-240"/>
+      <pos x="-1660" y="380"/>
     </visualElement>
     <visualElement>
       <elementName>In</elementName>
@@ -382,7 +348,7 @@ end Behavioral;</string>
           <int>32</int>
         </entry>
       </elementAttributes>
-      <pos x="-1180" y="-180"/>
+      <pos x="-600" y="240"/>
     </visualElement>
     <visualElement>
       <elementName>In</elementName>
@@ -396,7 +362,7 @@ end Behavioral;</string>
           <int>32</int>
         </entry>
       </elementAttributes>
-      <pos x="-1180" y="-140"/>
+      <pos x="-600" y="280"/>
     </visualElement>
     <visualElement>
       <elementName>Out</elementName>
@@ -406,37 +372,7 @@ end Behavioral;</string>
           <string>BitIgualdade</string>
         </entry>
       </elementAttributes>
-      <pos x="-920" y="-160"/>
-    </visualElement>
-    <visualElement>
-      <elementName>In</elementName>
-      <elementAttributes>
-        <entry>
-          <string>Label</string>
-          <string>IF/ID.PC</string>
-        </entry>
-      </elementAttributes>
-      <pos x="-520" y="-160"/>
-    </visualElement>
-    <visualElement>
-      <elementName>In</elementName>
-      <elementAttributes>
-        <entry>
-          <string>Label</string>
-          <string>ImediatoDoImmGen</string>
-        </entry>
-      </elementAttributes>
-      <pos x="-520" y="-120"/>
-    </visualElement>
-    <visualElement>
-      <elementName>Out</elementName>
-      <elementAttributes>
-        <entry>
-          <string>Label</string>
-          <string>NextPC(Branch&amp;Jal)</string>
-        </entry>
-      </elementAttributes>
-      <pos x="-260" y="-140"/>
+      <pos x="-420" y="260"/>
     </visualElement>
     <visualElement>
       <elementName>External</elementName>
@@ -472,6 +408,8 @@ entity IF_ID is
         rs1		: out STD_LOGIC_VECTOR(4 downto 0);
         rs2		: out STD_LOGIC_VECTOR(4 downto 0);
 	rd		: out STD_LOGIC_VECTOR(4 downto 0);
+	func3		: out STD_LOGIC_VECTOR(2 downto 0);
+	func7		: out STD_LOGIC_VECTOR(6 downto 0);
 	inst_out	: out STD_LOGIC_VECTOR(31 downto 0)
 
     );
@@ -501,19 +439,21 @@ end process;
 rs1 &lt;= inst_out(19 downto 15);
 rs2 &lt;= inst_out(24 downto 20);
 rd &lt;= inst_out(11 downto 7);
+func3 &lt;= inst_out(14 downto 12);
+func7 &lt;= inst_out(31 downto 25);
 
 end Behavioral;</string>
         </entry>
         <entry>
           <string>externalOutputs</string>
-          <string>PC_out:32,rs1:5,rs2:5,rd:5,inst_out:32</string>
+          <string>PC_out:32,rs1:5,rs2:5,rd:5,func3:3,func7:7,inst_out:32</string>
         </entry>
         <entry>
           <string>Width</string>
           <int>15</int>
         </entry>
       </elementAttributes>
-      <pos x="-1240" y="620"/>
+      <pos x="-1420" y="140"/>
     </visualElement>
     <visualElement>
       <elementName>External</elementName>
@@ -528,7 +468,7 @@ end Behavioral;</string>
         </entry>
         <entry>
           <string>externalInputs</string>
-          <string>rst,clk,rs1_in:5,rs2_in:5,rd_in:5,rs1_data_in:32,rs2_data_in:32,immediate_in:32,EXSignals_in:5,MEMSignals_in:32,WBSignals_in:32</string>
+          <string>rst,clk,PC_in:32,rs1_in:5,rs2_in:5,rd_in:5,rs1_data_in:32,rs2_data_in:32,func3_in:3,func7_in:7,immediate_in:32,EXSignals_in:5,MEMSignals_in:32,WBSignals_in:32</string>
         </entry>
         <entry>
           <string>Code</string>
@@ -540,31 +480,34 @@ entity ID_EX is
 	rst     	: in  STD_LOGIC; 
         clk		: in  STD_LOGIC;
 
+	PC_in		: in STD_LOGIC_VECTOR(31 downto 0);
         rs1_in		: in  STD_LOGIC_VECTOR(4 downto 0);
         rs2_in		: in  STD_LOGIC_VECTOR(4 downto 0);
         rd_in		: in  STD_LOGIC_VECTOR(4 downto 0);
         rs1_data_in	: in  STD_LOGIC_VECTOR(31 downto 0);
         rs2_data_in	: in  STD_LOGIC_VECTOR(31 downto 0);
+	func3_in	: in STD_LOGIC_VECTOR(2 downto 0);
+	func7_in	: in STD_LOGIC_VECTOR(6 downto 0);
         immediate_in	: in  STD_LOGIC_VECTOR(31 downto 0);
 
         EXSignals_in	: in  STD_LOGIC_VECTOR(4 downto 0);
         MEMSignals_in	: in  STD_LOGIC_VECTOR(31 downto 0);
         WBSignals_in	: in  STD_LOGIC_VECTOR(31 downto 0);
 
+        rs1_data_out	: out STD_LOGIC_VECTOR(31 downto 0);
+        rs2_data_out	: out STD_LOGIC_VECTOR(31 downto 0);
+	PC_out		: out STD_LOGIC_VECTOR(31 downto 0);
+	immediate_out	: out STD_LOGIC_VECTOR(31 downto 0);
+	ALUSrcA		: out STD_LOGIC;
+	ALUSrcB		: out STD_LOGIC;
+	func3_out	: out STD_LOGIC_VECTOR(2 downto 0);
+	func7_out	: out STD_LOGIC_VECTOR(6 downto 0);
+	ALUOp		: out STD_LOGIC_VECTOR(1 downto 0);
 	rs1_out		: out STD_LOGIC_VECTOR(4 downto 0);
 	rs2_out		: out STD_LOGIC_VECTOR(4 downto 0);
 	rd_out		: out STD_LOGIC_VECTOR(4 downto 0);
-        rs1_data_out	: out STD_LOGIC_VECTOR(31 downto 0);
-        rs2_data_out	: out STD_LOGIC_VECTOR(31 downto 0);
-	immediate_out	: out STD_LOGIC_VECTOR(31 downto 0);
-
-
 	MEMSignals_out	: out STD_LOGIC_VECTOR(31 downto 0);
-	WBSignals_out	: out STD_LOGIC_VECTOR(31 downto 0);
-	ALUSrcA		: out STD_LOGIC;
-	ALUSrcB		: out STD_LOGIC;
-	ALUOp		: out STD_LOGIC_VECTOR(1 downto 0)
-
+	WBSignals_out	: out STD_LOGIC_VECTOR(31 downto 0)
     );
 end ID_EX;
 
@@ -582,6 +525,8 @@ begin
 		rd_out &lt;= (others =&gt; &apos;0&apos;);
 		rs1_data_out &lt;= (others =&gt; &apos;0&apos;);
 		rs2_data_out &lt;= (others =&gt; &apos;0&apos;);
+		func3_out &lt;= (others =&gt; &apos;0&apos;);
+		func7_out &lt;= (others =&gt; &apos;0&apos;);
 		immediate_out &lt;= (others =&gt; &apos;0&apos;);
 		ALUSrcA &lt;= &apos;0&apos;;
 		ALUSrcB &lt;= &apos;0&apos;;
@@ -594,6 +539,8 @@ begin
 		rd_out &lt;= rd_in;
 		rs1_data_out &lt;= rs1_data_in;
 		rs2_data_out &lt;= rs2_data_in;
+		func3_out &lt;= func3_in;
+		func7_out &lt;= func7_in;
 		immediate_out &lt;= immediate_in;
 		ALUSrcA &lt;= EXSignals_in(0);
 		ALUSrcB &lt;= EXSignals_in(1);
@@ -607,14 +554,14 @@ end Behavioral;</string>
         </entry>
         <entry>
           <string>externalOutputs</string>
-          <string>rs1_out:5,rs2_out:5,rd_out:5,rs1_data_out:32,rs2_data_out:32,immediate_out:32,MEMSignals_out:32,WBSignals_out:32,ALUSrcA,ALUSrcB,ALUOp:2</string>
+          <string>rs1_data_out:32,rs2_data_out:32,PC_out:32,immediate_out:32,ALUSrcA,ALUSrcB,func3_out:3,func7_out:7,ALUOp:2,rs1_out:5,rs2_out:5,rd_out:5,MEMSignals_out:32,WBSignals_out:32</string>
         </entry>
         <entry>
           <string>Width</string>
           <int>15</int>
         </entry>
       </elementAttributes>
-      <pos x="-820" y="620"/>
+      <pos x="-100" y="100"/>
     </visualElement>
     <visualElement>
       <elementName>External</elementName>
@@ -648,12 +595,11 @@ entity EX_MEM is
 	MEMSignals_in	: in STD_LOGIC_VECTOR(1 downto 0);
 	WBSignals_in	: in STD_LOGIC_VECTOR(1 downto 0);
 
-	rd_out		: out STD_LOGIC_VECTOR(4 downto 0);
         rs2_data_out	: out STD_LOGIC_VECTOR(31 downto 0);
-	ALUoutput_out	: out  STD_LOGIC_VECTOR(31 downto 0);
-
 	MemRead		: out STD_LOGIC;
 	MemWrite	: out STD_LOGIC;
+	ALUoutput_out	: out  STD_LOGIC_VECTOR(31 downto 0);
+	rd_out		: out STD_LOGIC_VECTOR(4 downto 0);
 	WBSignals_out	: out STD_LOGIC_VECTOR(1 downto 0)
     );
 end EX_MEM;
@@ -687,14 +633,14 @@ end Behavioral;</string>
         </entry>
         <entry>
           <string>externalOutputs</string>
-          <string>rd_out:5,rs2_data_out:32,ALUoutput_out:32,MemRead,MemWrite,WBSignals_out:2</string>
+          <string>rs2_data_out:32,MemRead,MemWrite,ALUoutput_out:32,rd_out:5,WBSignals_out:2</string>
         </entry>
         <entry>
           <string>Width</string>
           <int>15</int>
         </entry>
       </elementAttributes>
-      <pos x="-400" y="620"/>
+      <pos x="900" y="180"/>
     </visualElement>
     <visualElement>
       <elementName>External</elementName>
@@ -709,7 +655,7 @@ end Behavioral;</string>
         </entry>
         <entry>
           <string>externalInputs</string>
-          <string>rst,clk,rd_in:5,DataFromMem_in:32,ALUoutput_in:32,WBSignals_in:2</string>
+          <string>rst,clk,DataFromMem_in:32,ALUoutput_in:32,rd_in:5,WBSignals_in:2</string>
         </entry>
         <entry>
           <string>Code</string>
@@ -721,9 +667,9 @@ entity EX_MEM is
 	rst     	: in  STD_LOGIC; 
         clk		: in  STD_LOGIC;
 
-        rd_in		: in  STD_LOGIC_VECTOR(4 downto 0);
         DataFromMem_in	: in  STD_LOGIC_VECTOR(31 downto 0);
 	ALUoutput_in	: in  STD_LOGIC_VECTOR(31 downto 0);
+        rd_in		: in  STD_LOGIC_VECTOR(4 downto 0);
 
 	WBSignals_in	: in STD_LOGIC_VECTOR(1 downto 0);
 
@@ -770,137 +716,439 @@ end Behavioral;</string>
           <int>15</int>
         </entry>
       </elementAttributes>
-      <pos x="20" y="620"/>
+      <pos x="1900" y="180"/>
+    </visualElement>
+    <visualElement>
+      <elementName>RegisterFile</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>So24bitsPraAddr</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-820" y="220"/>
     </visualElement>
   </visualElements>
   <wires>
     <wire>
-      <p1 x="-720" y="160"/>
-      <p2 x="-680" y="160"/>
+      <p1 x="-1660" y="320"/>
+      <p2 x="-1640" y="320"/>
     </wire>
     <wire>
-      <p1 x="-840" y="160"/>
-      <p2 x="-780" y="160"/>
+      <p1 x="-1740" y="320"/>
+      <p2 x="-1720" y="320"/>
     </wire>
     <wire>
-      <p1 x="-1060" y="160"/>
-      <p2 x="-920" y="160"/>
+      <p1 x="-1820" y="320"/>
+      <p2 x="-1780" y="320"/>
     </wire>
     <wire>
-      <p1 x="-1180" y="-140"/>
-      <p2 x="-1060" y="-140"/>
+      <p1 x="-580" y="320"/>
+      <p2 x="-260" y="320"/>
     </wire>
     <wire>
-      <p1 x="-320" y="-140"/>
-      <p2 x="-260" y="-140"/>
+      <p1 x="220" y="640"/>
+      <p2 x="880" y="640"/>
     </wire>
     <wire>
-      <p1 x="-1000" y="140"/>
-      <p2 x="-920" y="140"/>
+      <p1 x="1220" y="640"/>
+      <p2 x="1880" y="640"/>
     </wire>
     <wire>
-      <p1 x="-860" y="140"/>
-      <p2 x="-780" y="140"/>
+      <p1 x="-1740" y="160"/>
+      <p2 x="-1720" y="160"/>
     </wire>
     <wire>
-      <p1 x="-1040" y="300"/>
-      <p2 x="-900" y="300"/>
+      <p1 x="-1580" y="160"/>
+      <p2 x="-1560" y="160"/>
     </wire>
     <wire>
-      <p1 x="-1000" y="-80"/>
-      <p2 x="-440" y="-80"/>
+      <p1 x="-1120" y="160"/>
+      <p2 x="-1000" y="160"/>
     </wire>
     <wire>
-      <p1 x="-280" y="-240"/>
-      <p2 x="-180" y="-240"/>
+      <p1 x="-220" y="160"/>
+      <p2 x="-100" y="160"/>
     </wire>
     <wire>
-      <p1 x="40" y="-240"/>
-      <p2 x="80" y="-240"/>
+      <p1 x="-1540" y="260"/>
+      <p2 x="-1480" y="260"/>
     </wire>
     <wire>
-      <p1 x="-480" y="-20"/>
-      <p2 x="-440" y="-20"/>
+      <p1 x="-460" y="260"/>
+      <p2 x="-420" y="260"/>
     </wire>
     <wire>
-      <p1 x="-680" y="-20"/>
-      <p2 x="-620" y="-20"/>
+      <p1 x="-1120" y="260"/>
+      <p2 x="-980" y="260"/>
     </wire>
     <wire>
-      <p1 x="-440" y="-20"/>
-      <p2 x="-400" y="-20"/>
+      <p1 x="-160" y="260"/>
+      <p2 x="-100" y="260"/>
     </wire>
     <wire>
-      <p1 x="-1180" y="-180"/>
-      <p2 x="-1060" y="-180"/>
+      <p1 x="1200" y="260"/>
+      <p2 x="1240" y="260"/>
     </wire>
     <wire>
-      <p1 x="-1040" y="180"/>
-      <p2 x="-920" y="180"/>
+      <p1 x="1860" y="260"/>
+      <p2 x="1900" y="260"/>
     </wire>
     <wire>
-      <p1 x="-800" y="180"/>
-      <p2 x="-780" y="180"/>
+      <p1 x="-1040" y="580"/>
+      <p2 x="-180" y="580"/>
     </wire>
     <wire>
-      <p1 x="-880" y="180"/>
-      <p2 x="-860" y="180"/>
+      <p1 x="-1860" y="100"/>
+      <p2 x="-1560" y="100"/>
     </wire>
     <wire>
-      <p1 x="-520" y="-120"/>
-      <p2 x="-460" y="-120"/>
+      <p1 x="-960" y="100"/>
+      <p2 x="-840" y="100"/>
     </wire>
     <wire>
-      <p1 x="-680" y="120"/>
-      <p2 x="-620" y="120"/>
+      <p1 x="-1780" y="420"/>
+      <p2 x="-1760" y="420"/>
+    </wire>
+    <wire>
+      <p1 x="-1120" y="200"/>
+      <p2 x="-1040" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="-180" y="200"/>
+      <p2 x="-100" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="-1900" y="360"/>
+      <p2 x="-1820" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="360"/>
+      <p2 x="220" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="-1120" y="140"/>
+      <p2 x="-1080" y="140"/>
+    </wire>
+    <wire>
+      <p1 x="-1080" y="140"/>
+      <p2 x="-100" y="140"/>
+    </wire>
+    <wire>
+      <p1 x="-1580" y="300"/>
+      <p2 x="-1540" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="-1700" y="300"/>
+      <p2 x="-1640" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="-1900" y="300"/>
+      <p2 x="-1780" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="-240" y="300"/>
+      <p2 x="-100" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="880" y="300"/>
+      <p2 x="900" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="-1080" y="620"/>
+      <p2 x="-140" y="620"/>
+    </wire>
+    <wire>
+      <p1 x="240" y="620"/>
+      <p2 x="860" y="620"/>
+    </wire>
+    <wire>
+      <p1 x="1240" y="620"/>
+      <p2 x="1860" y="620"/>
+    </wire>
+    <wire>
+      <p1 x="-600" y="240"/>
+      <p2 x="-580" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="-1120" y="240"/>
+      <p2 x="-1080" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="-260" y="240"/>
+      <p2 x="-100" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="1840" y="240"/>
+      <p2 x="1900" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="1200" y="240"/>
+      <p2 x="1260" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="-580" y="240"/>
+      <p2 x="-560" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="560"/>
+      <p2 x="-200" y="560"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="340"/>
+      <p2 x="240" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="-740" y="500"/>
+      <p2 x="-700" y="500"/>
+    </wire>
+    <wire>
+      <p1 x="-980" y="500"/>
+      <p2 x="-960" y="500"/>
+    </wire>
+    <wire>
+      <p1 x="-700" y="500"/>
+      <p2 x="-240" y="500"/>
+    </wire>
+    <wire>
+      <p1 x="-1120" y="180"/>
+      <p2 x="-1020" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="-200" y="180"/>
+      <p2 x="-100" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="-580" y="180"/>
+      <p2 x="-260" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="-600" y="280"/>
+      <p2 x="-580" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="-1860" y="280"/>
+      <p2 x="-1780" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="-1720" y="280"/>
+      <p2 x="-1640" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="-140" y="280"/>
+      <p2 x="-100" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="860" y="280"/>
+      <p2 x="900" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="1200" y="280"/>
+      <p2 x="1220" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="1880" y="280"/>
+      <p2 x="1900" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="-580" y="280"/>
+      <p2 x="-560" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="-1060" y="600"/>
+      <p2 x="-160" y="600"/>
+    </wire>
+    <wire>
+      <p1 x="1260" y="600"/>
+      <p2 x="1840" y="600"/>
+    </wire>
+    <wire>
+      <p1 x="-960" y="440"/>
+      <p2 x="-700" y="440"/>
+    </wire>
+    <wire>
+      <p1 x="-1740" y="220"/>
+      <p2 x="-1540" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-1120" y="220"/>
+      <p2 x="-1060" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-260" y="220"/>
+      <p2 x="-100" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-1540" y="220"/>
+      <p2 x="-1420" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-1000" y="540"/>
+      <p2 x="-220" y="540"/>
+    </wire>
+    <wire>
+      <p1 x="-1080" y="60"/>
+      <p2 x="-840" y="60"/>
+    </wire>
+    <wire>
+      <p1 x="-1540" y="220"/>
+      <p2 x="-1540" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="-1540" y="260"/>
+      <p2 x="-1540" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="-1860" y="100"/>
+      <p2 x="-1860" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="-580" y="280"/>
+      <p2 x="-580" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="-580" y="180"/>
+      <p2 x="-580" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="-260" y="240"/>
+      <p2 x="-260" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="-260" y="180"/>
+      <p2 x="-260" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="1220" y="280"/>
+      <p2 x="1220" y="640"/>
+    </wire>
+    <wire>
+      <p1 x="1860" y="260"/>
+      <p2 x="1860" y="620"/>
+    </wire>
+    <wire>
+      <p1 x="-1480" y="260"/>
+      <p2 x="-1480" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="-200" y="180"/>
+      <p2 x="-200" y="560"/>
+    </wire>
+    <wire>
+      <p1 x="-1740" y="160"/>
+      <p2 x="-1740" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-140" y="280"/>
+      <p2 x="-140" y="620"/>
+    </wire>
+    <wire>
+      <p1 x="-1040" y="200"/>
+      <p2 x="-1040" y="580"/>
+    </wire>
+    <wire>
+      <p1 x="-980" y="260"/>
+      <p2 x="-980" y="500"/>
+    </wire>
+    <wire>
+      <p1 x="-1560" y="100"/>
+      <p2 x="-1560" y="160"/>
+    </wire>
+    <wire>
+      <p1 x="1880" y="280"/>
+      <p2 x="1880" y="640"/>
+    </wire>
+    <wire>
+      <p1 x="1240" y="260"/>
+      <p2 x="1240" y="620"/>
+    </wire>
+    <wire>
+      <p1 x="-1820" y="320"/>
+      <p2 x="-1820" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="-220" y="160"/>
+      <p2 x="-220" y="540"/>
+    </wire>
+    <wire>
+      <p1 x="220" y="360"/>
+      <p2 x="220" y="640"/>
+    </wire>
+    <wire>
+      <p1 x="860" y="280"/>
+      <p2 x="860" y="620"/>
+    </wire>
+    <wire>
+      <p1 x="-1760" y="360"/>
+      <p2 x="-1760" y="420"/>
+    </wire>
+    <wire>
+      <p1 x="-160" y="260"/>
+      <p2 x="-160" y="600"/>
+    </wire>
+    <wire>
+      <p1 x="-1700" y="300"/>
+      <p2 x="-1700" y="400"/>
     </wire>
     <wire>
       <p1 x="-1060" y="220"/>
-      <p2 x="-1040" y="220"/>
+      <p2 x="-1060" y="600"/>
     </wire>
     <wire>
-      <p1 x="-520" y="-160"/>
-      <p2 x="-460" y="-160"/>
+      <p1 x="-1000" y="160"/>
+      <p2 x="-1000" y="540"/>
     </wire>
     <wire>
-      <p1 x="-960" y="-160"/>
-      <p2 x="-920" y="-160"/>
+      <p1 x="1260" y="240"/>
+      <p2 x="1260" y="600"/>
     </wire>
     <wire>
-      <p1 x="-900" y="220"/>
-      <p2 x="-900" y="300"/>
+      <p1 x="-240" y="300"/>
+      <p2 x="-240" y="500"/>
     </wire>
     <wire>
-      <p1 x="-440" y="-80"/>
-      <p2 x="-440" y="-20"/>
+      <p1 x="880" y="300"/>
+      <p2 x="880" y="640"/>
     </wire>
     <wire>
-      <p1 x="-680" y="-20"/>
-      <p2 x="-680" y="120"/>
+      <p1 x="240" y="340"/>
+      <p2 x="240" y="620"/>
     </wire>
     <wire>
-      <p1 x="-680" y="120"/>
-      <p2 x="-680" y="160"/>
+      <p1 x="1840" y="240"/>
+      <p2 x="1840" y="600"/>
     </wire>
     <wire>
-      <p1 x="-840" y="160"/>
-      <p2 x="-840" y="460"/>
+      <p1 x="-180" y="200"/>
+      <p2 x="-180" y="580"/>
     </wire>
     <wire>
-      <p1 x="-1000" y="-80"/>
-      <p2 x="-1000" y="140"/>
+      <p1 x="-1720" y="280"/>
+      <p2 x="-1720" y="320"/>
     </wire>
     <wire>
-      <p1 x="-860" y="140"/>
-      <p2 x="-860" y="180"/>
+      <p1 x="-1080" y="60"/>
+      <p2 x="-1080" y="140"/>
     </wire>
     <wire>
-      <p1 x="-1040" y="180"/>
-      <p2 x="-1040" y="220"/>
+      <p1 x="-1080" y="240"/>
+      <p2 x="-1080" y="620"/>
     </wire>
     <wire>
-      <p1 x="-800" y="180"/>
-      <p2 x="-800" y="240"/>
+      <p1 x="-1660" y="320"/>
+      <p2 x="-1660" y="380"/>
+    </wire>
+    <wire>
+      <p1 x="-700" y="440"/>
+      <p2 x="-700" y="500"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="180"/>
+      <p2 x="-1020" y="560"/>
+    </wire>
+    <wire>
+      <p1 x="-960" y="100"/>
+      <p2 x="-960" y="440"/>
     </wire>
   </wires>
   <measurementOrdering/>
