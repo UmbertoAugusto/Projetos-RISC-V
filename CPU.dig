@@ -449,6 +449,7 @@ entity ID_EX is
 	ALUOp		: out STD_LOGIC_VECTOR(1 downto 0);
 	rs1_out		: out STD_LOGIC_VECTOR(4 downto 0);
 	rs2_out		: out STD_LOGIC_VECTOR(4 downto 0);
+	MemRead		: out STD_LOGIC;
 	rd_out		: out STD_LOGIC_VECTOR(4 downto 0);
 	MEMSignals_out	: out STD_LOGIC_VECTOR(1 downto 0);
 	WBSignals_out	: out STD_LOGIC_VECTOR(1 downto 0)
@@ -467,6 +468,7 @@ begin
 		rs1_out &lt;= (others =&gt; &apos;0&apos;);
 		rs2_out &lt;= (others =&gt; &apos;0&apos;);
 		rd_out &lt;= (others =&gt; &apos;0&apos;);
+		MemRead &lt;= &apos;0&apos;;
 		rs1_data_out &lt;= (others =&gt; &apos;0&apos;);
 		rs2_data_out &lt;= (others =&gt; &apos;0&apos;);
 		func3_out &lt;= (others =&gt; &apos;0&apos;);
@@ -481,6 +483,7 @@ begin
 		rs1_out &lt;= rs1_in;
 		rs2_out &lt;= rs2_in;
 		rd_out &lt;= rd_in;
+		MemRead &lt;= MEMSignals_in(0);
 		rs1_data_out &lt;= rs1_data_in;
 		rs2_data_out &lt;= rs2_data_in;
 		func3_out &lt;= func3_in;
@@ -498,7 +501,7 @@ end Behavioral;</string>
         </entry>
         <entry>
           <string>externalOutputs</string>
-          <string>rs1_data_out:32,rs2_data_out:32,PC_out:32,immediate_out:32,ALUSrcA:2,ALUSrcB,func3_out:3,func7_out:7,ALUOp:2,rs1_out:5,rs2_out:5,rd_out:5,MEMSignals_out:2,WBSignals_out:2</string>
+          <string>rs1_data_out:32,rs2_data_out:32,PC_out:32,immediate_out:32,ALUSrcA:2,ALUSrcB,func3_out:3,func7_out:7,ALUOp:2,rs1_out:5,rs2_out:5,MemRead,rd_out:5,MEMSignals_out:2,WBSignals_out:2</string>
         </entry>
         <entry>
           <string>Width</string>
@@ -520,7 +523,7 @@ end Behavioral;</string>
         </entry>
         <entry>
           <string>externalInputs</string>
-          <string>rst,clk,rs2_data_in:32,ALUoutput_in:32,rd_in:5,MEMSignals_in:2,WBSignals_in:2</string>
+          <string>rst,clk,ALUoutput_in:32,rs2_data_in:32,rd_in:5,MEMSignals_in:2,WBSignals_in:2</string>
         </entry>
         <entry>
           <string>Code</string>
@@ -532,17 +535,17 @@ entity EX_MEM is
 	rst     	: in  STD_LOGIC; 
         clk		: in  STD_LOGIC;
 
-        rs2_data_in	: in  STD_LOGIC_VECTOR(31 downto 0); --for store instruction
 	ALUoutput_in	: in  STD_LOGIC_VECTOR(31 downto 0);
+	rs2_data_in	: in  STD_LOGIC_VECTOR(31 downto 0); --for store instruction
         rd_in		: in  STD_LOGIC_VECTOR(4 downto 0);
 
 	MEMSignals_in	: in STD_LOGIC_VECTOR(1 downto 0);
 	WBSignals_in	: in STD_LOGIC_VECTOR(1 downto 0);
 
+	ALUoutput_out	: out  STD_LOGIC_VECTOR(31 downto 0);
         rs2_data_out	: out STD_LOGIC_VECTOR(31 downto 0);
 	MemRead		: out STD_LOGIC;
 	MemWrite	: out STD_LOGIC;
-	ALUoutput_out	: out  STD_LOGIC_VECTOR(31 downto 0);
 	rd_out		: out STD_LOGIC_VECTOR(4 downto 0);
 	WBSignals_out	: out STD_LOGIC_VECTOR(1 downto 0)
     );
@@ -577,14 +580,14 @@ end Behavioral;</string>
         </entry>
         <entry>
           <string>externalOutputs</string>
-          <string>rs2_data_out:32,MemRead,MemWrite,ALUoutput_out:32,rd_out:5,WBSignals_out:2</string>
+          <string>ALUoutput_out:32,rs2_data_out:32,MemRead,MemWrite,rd_out:5,WBSignals_out:2</string>
         </entry>
         <entry>
           <string>Width</string>
           <int>15</int>
         </entry>
       </elementAttributes>
-      <pos x="900" y="180"/>
+      <pos x="1060" y="180"/>
     </visualElement>
     <visualElement>
       <elementName>External</elementName>
@@ -595,7 +598,7 @@ end Behavioral;</string>
         </entry>
         <entry>
           <string>Label</string>
-          <string>EX_MEM</string>
+          <string>MEM_WB</string>
         </entry>
         <entry>
           <string>externalInputs</string>
@@ -606,7 +609,7 @@ end Behavioral;</string>
           <string>library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity EX_MEM is
+entity MEM_WB is
     Port ( 
 	rst     	: in  STD_LOGIC; 
         clk		: in  STD_LOGIC;
@@ -624,9 +627,9 @@ entity EX_MEM is
 	MemToReg 	: out STD_LOGIC;
 	RegWrite 	: out STD_LOGIC
     );
-end EX_MEM;
+end MEM_WB;
 
-architecture Behavioral of EX_MEM is
+architecture Behavioral of MEM_WB is
 
 signal s_dado : STD_LOGIC_VECTOR(31 downto 0);
 
@@ -684,12 +687,12 @@ end Behavioral;</string>
       <elementName>External</elementName>
       <elementAttributes>
         <entry>
-          <string>Label</string>
-          <string>Mux_4para1</string>
-        </entry>
-        <entry>
           <string>applicationType</string>
           <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>Mux_4para1</string>
         </entry>
         <entry>
           <string>externalInputs</string>
@@ -730,7 +733,7 @@ end Behavorial;</string>
           <string>Y:2</string>
         </entry>
       </elementAttributes>
-      <pos x="400" y="-120"/>
+      <pos x="-60" y="-320"/>
     </visualElement>
     <visualElement>
       <elementName>External</elementName>
@@ -779,7 +782,7 @@ end Behavorial;</string>
           <string>A:32</string>
         </entry>
       </elementAttributes>
-      <pos x="480" y="140"/>
+      <pos x="680" y="80"/>
     </visualElement>
     <visualElement>
       <elementName>External</elementName>
@@ -827,7 +830,7 @@ end Behavorial;</string>
           <string>B:32</string>
         </entry>
       </elementAttributes>
-      <pos x="480" y="280"/>
+      <pos x="680" y="280"/>
     </visualElement>
     <visualElement>
       <elementName>External</elementName>
@@ -963,7 +966,7 @@ end Behavorial;</string>
         </entry>
         <entry>
           <string>externalInputs</string>
-          <string>EXSignals_in:5,MEMSignals_in:2,WBSignals_in:2,stall</string>
+          <string>stall,EXSignals_in:5,MEMSignals_in:2,WBSignals_in:2</string>
         </entry>
         <entry>
           <string>Code</string>
@@ -972,10 +975,10 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity Mux_ControlSignals is
     Port (
+        stall		: in  std_logic;
         EXSignals_in	: in  STD_LOGIC_VECTOR(4 downto 0);
         MEMSignals_in	: in  STD_LOGIC_VECTOR(1 downto 0);
         WBSignals_in	: in  STD_LOGIC_VECTOR(1 downto 0);
-        stall		: in  std_logic;
         EXSignals_out	: out STD_LOGIC_VECTOR(4 downto 0);
         MEMSignals_out	: out STD_LOGIC_VECTOR(1 downto 0);
         WBSignals_out	: out STD_LOGIC_VECTOR(1 downto 0)
@@ -1011,55 +1014,649 @@ end Behavorial;</string>
       </elementAttributes>
       <pos x="-540" y="40"/>
     </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>Control</string>
+        </entry>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>JALR_2ndCycle,Instr:32</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity Control is
+    Port (
+        JALR_2ndCycle : in  std_logic; -- Entrada especial
+        Instr        : in  std_logic_vector(31 downto 0); -- instrução completa
+
+        JALR         : out std_logic;
+        JAL          : out std_logic;
+        BranchEQ     : out std_logic;
+        BranchNEQ    : out std_logic;
+        EXSignals    : out std_logic_vector(4 downto 0);	-- ALUOp(2), ALUSrcB, ALUSrcA(2)
+        MEMSignals   : out std_logic_vector(1 downto 0);	-- MemWrite, MemRead
+        WBSignals    : out std_logic_vector(1 downto 0);	-- RegWrite, MemToReg
+        ImmSrc       : out std_logic                     	-- 0 = IMM_GEN, 1 = 4
+    );
+end Control;
+
+architecture Behavioral of Control is
+    signal opcode : std_logic_vector(6 downto 0);
+begin
+    opcode &lt;= Instr(6 downto 0);  -- extrai opcode da instrução
+
+    process(Instr,JALR_2ndCycle)
+        -- sinais temporários
+        variable ALUOp    : std_logic_vector(1 downto 0);
+        variable ALUSrcA  : std_logic_vector(1 downto 0);
+        variable ALUSrcB  : std_logic;
+        variable MemRead  : std_logic;
+        variable MemWrite : std_logic;
+        variable RegWrite : std_logic;
+        variable MemToReg : std_logic;
+        variable imm4     : std_logic;
+        variable isJAL    : std_logic;
+        variable isBEQ    : std_logic;
+        variable isBNE    : std_logic;
+        variable isJALR   : std_logic;
+    begin
+        -- valores padrão
+        ALUOp     := &quot;00&quot;;
+        ALUSrcA   := &quot;00&quot;;
+        ALUSrcB   := &apos;0&apos;;
+        MemRead   := &apos;0&apos;;
+        MemWrite  := &apos;0&apos;;
+        RegWrite  := &apos;0&apos;;
+        MemToReg  := &apos;0&apos;;
+        imm4      := &apos;0&apos;;
+        isJAL     := &apos;0&apos;;
+        isBEQ     := &apos;0&apos;;
+        isBNE     := &apos;0&apos;;
+        isJALR    := &apos;0&apos;;
+
+        if JALR_2ndCycle = &apos;1&apos; then
+            imm4        := &apos;1&apos;;           -- força imediato 4
+            ALUOp       := &quot;11&quot;;          -- ALUOp=00, SrcB=1, SrcA=11 (PC+4)
+            ALUSrcA     := &quot;01&quot;;
+            ALUSrcB     := &apos;1&apos;;
+            MemWrite    := &apos;0&apos;;           -- sem memória
+            MemRead     := &apos;0&apos;;
+            RegWrite    := &apos;1&apos;;           -- escreve registrador, via ALU
+            MemToReg    := &apos;0&apos;;
+            isJAL       := &apos;0&apos;;
+            isBEQ       := &apos;0&apos;;
+            isBNE       := &apos;0&apos;;
+				    isJALR      := &apos;0&apos;;           -- garante que pipeline não fica presa em JALR
+				 else
+            case opcode is
+                when &quot;0110011&quot; =&gt; -- R-type: add, sub, and, or, xor, sll, srl
+                    RegWrite  := &apos;1&apos;;
+                    ALUOp     := &quot;01&quot;;
+                    ALUSrcB   := &apos;0&apos;;
+                    ALUSrcA   := &quot;00&quot;;
+
+                when &quot;0010011&quot; =&gt; -- I-type: addi, andi, ori, xori, slli, srli
+                    RegWrite  := &apos;1&apos;;
+                    ALUOp     := &quot;10&quot;;
+                    ALUSrcB   := &apos;1&apos;;
+                    ALUSrcA   := &quot;00&quot;;
+
+                when &quot;0000011&quot; =&gt; -- lw
+                    RegWrite  := &apos;1&apos;;
+                    MemRead   := &apos;1&apos;;
+                    MemToReg  := &apos;1&apos;;
+                    ALUOp     := &quot;11&quot;;
+                    ALUSrcB   := &apos;1&apos;;
+                    ALUSrcA   := &quot;00&quot;;
+
+                when &quot;0100011&quot; =&gt; -- sw
+                    MemWrite  := &apos;1&apos;;
+                    ALUOp     := &quot;11&quot;;
+                    ALUSrcB   := &apos;1&apos;;
+                    ALUSrcA   := &quot;00&quot;;
+
+                when &quot;1100011&quot; =&gt; -- beq, bne
+                    ALUOp     := &quot;00&quot;; -- don&apos;t care
+                    ALUSrcB   := &apos;0&apos;;  -- don&apos;t care
+                    ALUSrcA   := &quot;00&quot;; -- don&apos;t care
+                    case Instr(14 downto 12) is -- funct3
+                        when &quot;000&quot; =&gt; isBEQ := &apos;1&apos;;  -- beq
+                        when &quot;001&quot; =&gt; isBNE := &apos;1&apos;;  -- bne
+                        when others =&gt; null;
+                    end case;
+
+                when &quot;1101111&quot; =&gt; -- jal
+                    RegWrite  := &apos;1&apos;;
+                    ALUOp     := &quot;11&quot;;
+                    ALUSrcB   := &apos;1&apos;;
+                    ALUSrcA   := &quot;01&quot;; -- PC + Imm
+                    imm4      := &apos;1&apos;;
+                    isJAL     := &apos;1&apos;;
+
+                when &quot;1100111&quot; =&gt; -- jalr
+                    RegWrite  := &apos;0&apos;;
+                    ALUOp     := &quot;11&quot;;
+                    ALUSrcB   := &apos;1&apos;;
+                    ALUSrcA   := &quot;00&quot;; -- rs1 + Imm
+                    isJALR    := &apos;1&apos;;
+
+                when &quot;0010111&quot; =&gt; -- auipc
+                    RegWrite  := &apos;1&apos;;
+                    ALUOp     := &quot;11&quot;;
+                    ALUSrcB   := &apos;1&apos;;
+                    ALUSrcA   := &quot;01&quot;; -- PC + Imm
+
+                when &quot;0110111&quot; =&gt; -- lui
+                    RegWrite  := &apos;1&apos;;
+                    ALUOp     := &quot;11&quot;;
+                    ALUSrcB   := &apos;1&apos;;
+                    ALUSrcA   := &quot;10&quot;;
+
+                when others =&gt;
+                    -- valores padrão
+            end case;
+        end if;
+
+        -- atribuição final aos sinais de saída
+        EXSignals  &lt;= ALUOp &amp; ALUSrcB &amp; ALUSrcA;
+        MEMSignals &lt;= MemWrite &amp; MemRead;
+        WBSignals  &lt;= RegWrite &amp; MemToReg;
+        ImmSrc     &lt;= imm4;
+        JAL        &lt;= isJAL;
+        BranchEQ   &lt;= isBEQ;
+        BranchNEQ  &lt;= isBNE;
+        JALR       &lt;= isJALR;
+    end process;
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>JALR,JAL,BranchEQ,BranchNEQ,EXSignals:5,MEMSignals:2,WBSignals:2,ImmSrc</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>13</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-980" y="-200"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>JALR_2ndCycle_FF</string>
+        </entry>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>clk,rst,JALR_in</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity JALR_2ndCycle_FF is
+    Port (
+        clk          : in  std_logic;
+        rst          : in  std_logic;
+        JALR_in      : in  std_logic;  -- sinal JALR do Control
+        JALR_2ndCycle: out std_logic   -- sinal que indica o 2º ciclo
+    );
+end JALR_2ndCycle_FF;
+
+architecture Behavioral of JALR_2ndCycle_FF is
+    signal jalr_reg : std_logic := &apos;0&apos;;
+begin
+    process(clk, rst)
+    begin
+        if rst = &apos;1&apos; then
+            jalr_reg &lt;= &apos;0&apos;;
+        elsif rising_edge(clk) then
+            jalr_reg &lt;= JALR_in;
+        end if;
+    end process;
+
+    JALR_2ndCycle &lt;= jalr_reg;
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>JALR_2ndCycle</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>13</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-980" y="-340"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>Mux_ImmSrc</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>SEL,imm_in:32</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity Mux_ImmSrc is
+    Port (
+	SEL	: in  std_logic; -- Linha de seleção
+        imm_in	: in  std_logic_vector(31 downto 0); -- Entrada de dados 0
+        imm_out	: out std_logic_vector(31 downto 0)  -- Saída de dados
+    );
+end Mux_ImmSrc;
+
+architecture Behavorial of Mux_ImmSrc is
+begin
+    process(imm_in, SEL)
+    begin
+        case SEL is
+            when &apos;0&apos;   =&gt; imm_out &lt;= imm_in;
+            when others =&gt; imm_out &lt;= std_logic_vector(to_unsigned(4, imm_out&apos;length));
+        end case;
+    end process;
+
+end Behavorial;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>imm_out:32</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>7</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-480" y="400"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>HazardUnit</string>
+        </entry>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>ID_EX_MemRead,ID_EX_RegisterRd:5,IF_ID_RegisterRs1:5,IF_ID_RegisterRs2:5</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity HazardUnit is
+    Port (
+        ID_EX_MemRead    : in  std_logic;
+        ID_EX_RegisterRd : in  std_logic_vector(4 downto 0);
+        IF_ID_RegisterRs1: in  std_logic_vector(4 downto 0);
+        IF_ID_RegisterRs2: in  std_logic_vector(4 downto 0);
+
+        StallPipeline    : out std_logic
+    );
+end HazardUnit;
+
+architecture Behavioral of HazardUnit is
+begin
+    process(ID_EX_MemRead, ID_EX_RegisterRd, IF_ID_RegisterRs1, IF_ID_RegisterRs2)
+    begin
+        if (ID_EX_MemRead = &apos;1&apos;) and
+           ((ID_EX_RegisterRd = IF_ID_RegisterRs1) or
+            (ID_EX_RegisterRd = IF_ID_RegisterRs2)) then
+            StallPipeline &lt;= &apos;1&apos;;
+        else
+            StallPipeline &lt;= &apos;0&apos;;
+        end if;
+    end process;
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>StallPipeline</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>9</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-940" y="-520"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>ALU</string>
+        </entry>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>ALUctl:4,A:32,B:32</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity ALU is
+    Port (
+        ALUctl  : in  std_logic_vector(3 downto 0);
+        A       : in  std_logic_vector(31 downto 0);
+        B       : in  std_logic_vector(31 downto 0);
+        ALUOut  : out std_logic_vector(31 downto 0)
+    );
+end ALU;
+
+architecture Behavioral of ALU is
+    signal result : std_logic_vector(31 downto 0);
+begin
+
+    process(ALUctl, A, B)
+        variable A_int : signed(31 downto 0);
+        variable B_int : signed(31 downto 0);
+        variable B_unsigned : unsigned(31 downto 0);
+        variable shift_amt  : integer;
+    begin
+        A_int := signed(A);
+        B_int := signed(B);
+        B_unsigned := unsigned(B);
+        shift_amt := to_integer(B_unsigned);  -- uso direto de B como deslocamento
+
+        case ALUctl is
+            when &quot;0000&quot; =&gt; -- AND
+                result &lt;= A and B;
+
+            when &quot;0001&quot; =&gt; -- OR
+                result &lt;= A or B;
+
+            when &quot;0010&quot; =&gt; -- ADD
+                result &lt;= std_logic_vector(A_int + B_int);
+
+            when &quot;0110&quot; =&gt; -- SUB
+                result &lt;= std_logic_vector(A_int - B_int);
+
+            when &quot;1000&quot; =&gt; -- SLL (Shift Left Logical)
+                result &lt;= std_logic_vector(shift_left(unsigned(A), shift_amt));
+
+            when &quot;1001&quot; =&gt; -- SRL (Shift Right Logical)
+                result &lt;= std_logic_vector(shift_right(unsigned(A), shift_amt));
+
+            when &quot;1100&quot; =&gt; -- XOR
+                result &lt;= A xor B;
+
+            when others =&gt;
+                result &lt;= (others =&gt; &apos;0&apos;);
+        end case;
+    end process;
+
+    ALUOut &lt;= result;
+
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>ALUOut:32</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>7</int>
+        </entry>
+      </elementAttributes>
+      <pos x="820" y="200"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>FowardingA</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>ID_EX:32,EX_MEM:32,MEM_WB:32,SEL:2</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity FowardingA is
+    Port (
+        ID_EX	: in  std_logic_vector(31 downto 0); -- Entrada de dados 0
+        EX_MEM	: in  std_logic_vector(31 downto 0); -- Entrada de dados 1
+        MEM_WB	: in  std_logic_vector(31 downto 0); -- Entrada de dados 2
+        SEL		: in  std_logic_vector(1 downto 0); -- Linha de seleção de 2 bits
+        A		: out std_logic_vector(31 downto 0)  -- Saída de dados
+    );
+end FowardingA;
+
+architecture Behavorial of FowardingA is
+begin
+    process(ID_EX, EX_MEM, MEM_WB, SEL)
+    begin
+        case SEL is
+            when &quot;00&quot;   =&gt; A &lt;= ID_EX;
+            when &quot;01&quot;   =&gt; A &lt;= EX_MEM;
+            when &quot;10&quot;   =&gt; A &lt;= MEM_WB;
+            when others =&gt; A &lt;= (others =&gt; &apos;0&apos;); -- casos invalidos
+        end case;
+    end process;
+
+end Behavorial;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>A:32</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>5</int>
+        </entry>
+      </elementAttributes>
+      <pos x="520" y="40"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>FowardingB</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>ID_EX:32,EX_MEM:32,MEM_WB:32,SEL:2</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity FowardingB is
+    Port (
+        ID_EX	: in  std_logic_vector(31 downto 0); -- Entrada de dados 0
+        EX_MEM	: in  std_logic_vector(31 downto 0); -- Entrada de dados 1
+        MEM_WB	: in  std_logic_vector(31 downto 0); -- Entrada de dados 2
+        SEL		: in  std_logic_vector(1 downto 0); -- Linha de seleção de 2 bits
+        B		: out std_logic_vector(31 downto 0)  -- Saída de dados
+    );
+end FowardingB;
+
+architecture Behavorial of FowardingB is
+begin
+    process(ID_EX, EX_MEM, MEM_WB, SEL)
+    begin
+        case SEL is
+            when &quot;00&quot;   =&gt; B &lt;= ID_EX;
+            when &quot;01&quot;   =&gt; B &lt;= EX_MEM;
+            when &quot;10&quot;   =&gt; B &lt;= MEM_WB;
+            when others =&gt; B &lt;= (others =&gt; &apos;0&apos;); -- casos invalidos
+        end case;
+    end process;
+
+end Behavorial;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>B:32</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>5</int>
+        </entry>
+      </elementAttributes>
+      <pos x="520" y="240"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>ALUControl</string>
+        </entry>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>ALUOp:2,Funct3:3,Funct7:7</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity ALUControl is
+    Port (
+        ALUOp	: in  std_logic_vector(1 downto 0);
+        Funct3	: in  std_logic_vector(2 downto 0);
+        Funct7	: in  std_logic_vector(6 downto 0);  -- Bit 30 da instrucao
+        ALUCtl	: out std_logic_vector(3 downto 0)
+    );
+end ALUControl;
+
+architecture Behavioral of ALUControl is
+signal Funct7bit5 : std_logic;
+begin
+Funct7bit5 &lt;= Funct7(5);
+    process(ALUOp, Funct3, Funct7bit5)
+    begin
+        case ALUOp is
+	    -- 00: Para instrucoes do tipo branch (BEQ, BNE), usam SUB para comparacao
+            when &quot;00&quot; =&gt;
+                ALUCtl &lt;= &quot;0110&quot;;  -- SUB
+
+            -- 01: Para instrucoes do tipo R-Type (ADD, AND, OR, SLL, SRL, SUB, XOR)
+            when &quot;01&quot; =&gt;
+		case Funct3 is
+                    when &quot;000&quot; =&gt;  -- ADD ou SUB
+                        if Funct7bit5 = &apos;0&apos; then
+                            ALUCtl &lt;= &quot;0010&quot;; -- ADD
+                        else
+                            ALUCtl &lt;= &quot;0110&quot;; -- SUB
+                        end if;
+                    when &quot;111&quot; =&gt; ALUCtl &lt;= &quot;0000&quot;; -- AND
+                    when &quot;110&quot; =&gt; ALUCtl &lt;= &quot;0001&quot;; -- OR
+                    when &quot;001&quot; =&gt; ALUCtl &lt;= &quot;1000&quot;; -- SLL 
+                    when &quot;101&quot; =&gt; ALUCtl &lt;= &quot;1001&quot;; -- SRL 
+                    when &quot;100&quot; =&gt; ALUCtl &lt;= &quot;1100&quot;; -- XOR 
+                    when others =&gt; ALUCtl &lt;= &quot;1111&quot;; -- invalido
+                end case;
+
+            -- 10: Para instrucoes do tipo I-Type (ADDI, ANDI, ORI, SLLI, SRLI, XORI)
+            when &quot;10&quot; =&gt;
+		case Funct3 is
+                    when &quot;000&quot; =&gt; ALUCtl &lt;= &quot;0010&quot;; -- ADDI  
+                    when &quot;111&quot; =&gt; ALUCtl &lt;= &quot;0000&quot;; -- ANDI
+                    when &quot;110&quot; =&gt; ALUCtl &lt;= &quot;0001&quot;; -- ORI
+                    when &quot;001&quot; =&gt; ALUCtl &lt;= &quot;1000&quot;; -- SLLI 
+                    when &quot;101&quot; =&gt; ALUCtl &lt;= &quot;1001&quot;; -- SRLI 
+                    when &quot;100&quot; =&gt; ALUCtl &lt;= &quot;1100&quot;; -- XORI 
+                    when others =&gt; ALUCtl &lt;= &quot;1111&quot;; -- invalido
+                end case;
+
+            -- 11: Para instrucoes que usam a ALU para soma 
+            when &quot;11&quot; =&gt;
+                ALUCtl &lt;= &quot;0010&quot;; 
+
+            -- Default
+            when others =&gt;
+                ALUCtl &lt;= &quot;1111&quot;; -- invalido
+        end case;
+    end process;
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>ALUCtl:4</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>7</int>
+        </entry>
+      </elementAttributes>
+      <pos x="620" y="400"/>
+    </visualElement>
   </visualElements>
   <wires>
-    <wire>
-      <p1 x="-1660" y="320"/>
-      <p2 x="-1640" y="320"/>
-    </wire>
-    <wire>
-      <p1 x="-1740" y="320"/>
-      <p2 x="-1720" y="320"/>
-    </wire>
-    <wire>
-      <p1 x="-160" y="320"/>
-      <p2 x="-100" y="320"/>
-    </wire>
-    <wire>
-      <p1 x="-1020" y="320"/>
-      <p2 x="-820" y="320"/>
-    </wire>
-    <wire>
-      <p1 x="-580" y="320"/>
-      <p2 x="-240" y="320"/>
-    </wire>
-    <wire>
-      <p1 x="200" y="320"/>
-      <p2 x="260" y="320"/>
-    </wire>
-    <wire>
-      <p1 x="-1980" y="320"/>
-      <p2 x="-1920" y="320"/>
-    </wire>
-    <wire>
-      <p1 x="220" y="640"/>
-      <p2 x="880" y="640"/>
-    </wire>
-    <wire>
-      <p1 x="1220" y="640"/>
-      <p2 x="1880" y="640"/>
-    </wire>
     <wire>
       <p1 x="-1980" y="0"/>
       <p2 x="-680" y="0"/>
     </wire>
     <wire>
-      <p1 x="-1540" y="260"/>
-      <p2 x="-1480" y="260"/>
+      <p1 x="1380" y="640"/>
+      <p2 x="1880" y="640"/>
     </wire>
     <wire>
-      <p1 x="1200" y="260"/>
-      <p2 x="1240" y="260"/>
+      <p1 x="-1540" y="260"/>
+      <p2 x="-1480" y="260"/>
     </wire>
     <wire>
       <p1 x="1860" y="260"/>
@@ -1082,10 +1679,6 @@ end Behavorial;</string>
       <p2 x="-100" y="260"/>
     </wire>
     <wire>
-      <p1 x="840" y="260"/>
-      <p2 x="900" y="260"/>
-    </wire>
-    <wire>
       <p1 x="2200" y="260"/>
       <p2 x="2220" y="260"/>
     </wire>
@@ -1094,36 +1687,28 @@ end Behavorial;</string>
       <p2 x="-820" y="260"/>
     </wire>
     <wire>
-      <p1 x="-1040" y="580"/>
-      <p2 x="-180" y="580"/>
+      <p1 x="1000" y="260"/>
+      <p2 x="1060" y="260"/>
     </wire>
     <wire>
-      <p1 x="-1120" y="200"/>
-      <p2 x="-1020" y="200"/>
+      <p1 x="200" y="260"/>
+      <p2 x="340" y="260"/>
     </wire>
     <wire>
-      <p1 x="-580" y="200"/>
-      <p2 x="-240" y="200"/>
+      <p1 x="440" y="260"/>
+      <p2 x="520" y="260"/>
     </wire>
     <wire>
-      <p1 x="-220" y="200"/>
-      <p2 x="-100" y="200"/>
+      <p1 x="1360" y="260"/>
+      <p2 x="1400" y="260"/>
     </wire>
     <wire>
-      <p1 x="2200" y="200"/>
-      <p2 x="2300" y="200"/>
+      <p1 x="-960" y="-520"/>
+      <p2 x="-940" y="-520"/>
     </wire>
     <wire>
       <p1 x="-2040" y="520"/>
       <p2 x="-1940" y="520"/>
-    </wire>
-    <wire>
-      <p1 x="-960" y="460"/>
-      <p2 x="-620" y="460"/>
-    </wire>
-    <wire>
-      <p1 x="-2040" y="460"/>
-      <p2 x="-1960" y="460"/>
     </wire>
     <wire>
       <p1 x="-1120" y="140"/>
@@ -1134,48 +1719,36 @@ end Behavorial;</string>
       <p2 x="-100" y="140"/>
     </wire>
     <wire>
+      <p1 x="200" y="140"/>
+      <p2 x="640" y="140"/>
+    </wire>
+    <wire>
       <p1 x="-980" y="140"/>
       <p2 x="-220" y="140"/>
     </wire>
     <wire>
-      <p1 x="-700" y="80"/>
-      <p2 x="-680" y="80"/>
+      <p1 x="-660" y="400"/>
+      <p2 x="-480" y="400"/>
     </wire>
     <wire>
-      <p1 x="-240" y="80"/>
-      <p2 x="-200" y="80"/>
+      <p1 x="340" y="400"/>
+      <p2 x="620" y="400"/>
     </wire>
     <wire>
-      <p1 x="200" y="340"/>
-      <p2 x="240" y="340"/>
+      <p1 x="440" y="-20"/>
+      <p2 x="1380" y="-20"/>
     </wire>
     <wire>
-      <p1 x="-140" y="340"/>
-      <p2 x="-100" y="340"/>
+      <p1 x="1380" y="-20"/>
+      <p2 x="1840" y="-20"/>
     </wire>
     <wire>
-      <p1 x="-1040" y="340"/>
-      <p2 x="-820" y="340"/>
-    </wire>
-    <wire>
-      <p1 x="-1960" y="340"/>
-      <p2 x="-1920" y="340"/>
-    </wire>
-    <wire>
-      <p1 x="-2120" y="340"/>
-      <p2 x="-1980" y="340"/>
+      <p1 x="240" y="660"/>
+      <p2 x="1000" y="660"/>
     </wire>
     <wire>
       <p1 x="-1720" y="280"/>
       <p2 x="-1640" y="280"/>
-    </wire>
-    <wire>
-      <p1 x="860" y="280"/>
-      <p2 x="900" y="280"/>
-    </wire>
-    <wire>
-      <p1 x="1200" y="280"/>
-      <p2 x="1220" y="280"/>
     </wire>
     <wire>
       <p1 x="1880" y="280"/>
@@ -1198,40 +1771,16 @@ end Behavorial;</string>
       <p2 x="-820" y="280"/>
     </wire>
     <wire>
-      <p1 x="1260" y="600"/>
-      <p2 x="1840" y="600"/>
+      <p1 x="620" y="280"/>
+      <p2 x="680" y="280"/>
     </wire>
     <wire>
-      <p1 x="-1060" y="600"/>
-      <p2 x="-160" y="600"/>
+      <p1 x="1020" y="280"/>
+      <p2 x="1060" y="280"/>
     </wire>
     <wire>
-      <p1 x="260" y="600"/>
-      <p2 x="840" y="600"/>
-    </wire>
-    <wire>
-      <p1 x="-1740" y="220"/>
-      <p2 x="-1540" y="220"/>
-    </wire>
-    <wire>
-      <p1 x="-1120" y="220"/>
-      <p2 x="-1040" y="220"/>
-    </wire>
-    <wire>
-      <p1 x="-240" y="220"/>
-      <p2 x="-100" y="220"/>
-    </wire>
-    <wire>
-      <p1 x="2200" y="220"/>
-      <p2 x="2300" y="220"/>
-    </wire>
-    <wire>
-      <p1 x="2480" y="220"/>
-      <p2 x="2520" y="220"/>
-    </wire>
-    <wire>
-      <p1 x="-1540" y="220"/>
-      <p2 x="-1420" y="220"/>
+      <p1 x="1360" y="280"/>
+      <p2 x="1380" y="280"/>
     </wire>
     <wire>
       <p1 x="-1000" y="540"/>
@@ -1254,36 +1803,44 @@ end Behavorial;</string>
       <p2 x="-100" y="160"/>
     </wire>
     <wire>
+      <p1 x="200" y="160"/>
+      <p2 x="380" y="160"/>
+    </wire>
+    <wire>
       <p1 x="-920" y="800"/>
+      <p2 x="460" y="800"/>
+    </wire>
+    <wire>
+      <p1 x="460" y="800"/>
       <p2 x="2520" y="800"/>
     </wire>
     <wire>
-      <p1 x="-1940" y="100"/>
-      <p2 x="-1560" y="100"/>
+      <p1 x="760" y="420"/>
+      <p2 x="800" y="420"/>
     </wire>
     <wire>
-      <p1 x="-960" y="100"/>
-      <p2 x="-840" y="100"/>
-    </wire>
-    <wire>
-      <p1 x="-880" y="740"/>
-      <p2 x="2220" y="740"/>
-    </wire>
-    <wire>
-      <p1 x="200" y="360"/>
-      <p2 x="220" y="360"/>
-    </wire>
-    <wire>
-      <p1 x="-120" y="360"/>
-      <p2 x="-100" y="360"/>
-    </wire>
-    <wire>
-      <p1 x="-1940" y="360"/>
-      <p2 x="-1920" y="360"/>
+      <p1 x="320" y="420"/>
+      <p2 x="620" y="420"/>
     </wire>
     <wire>
       <p1 x="-240" y="40"/>
       <p2 x="-160" y="40"/>
+    </wire>
+    <wire>
+      <p1 x="260" y="40"/>
+      <p2 x="520" y="40"/>
+    </wire>
+    <wire>
+      <p1 x="220" y="680"/>
+      <p2 x="1020" y="680"/>
+    </wire>
+    <wire>
+      <p1 x="-1000" y="-300"/>
+      <p2 x="-980" y="-300"/>
+    </wire>
+    <wire>
+      <p1 x="740" y="300"/>
+      <p2 x="780" y="300"/>
     </wire>
     <wire>
       <p1 x="-1580" y="300"/>
@@ -1294,10 +1851,6 @@ end Behavorial;</string>
       <p2 x="-1640" y="300"/>
     </wire>
     <wire>
-      <p1 x="880" y="300"/>
-      <p2 x="900" y="300"/>
-    </wire>
-    <wire>
       <p1 x="-180" y="300"/>
       <p2 x="-100" y="300"/>
     </wire>
@@ -1306,24 +1859,328 @@ end Behavorial;</string>
       <p2 x="-1920" y="300"/>
     </wire>
     <wire>
-      <p1 x="240" y="620"/>
-      <p2 x="860" y="620"/>
+      <p1 x="1040" y="300"/>
+      <p2 x="1060" y="300"/>
     </wire>
     <wire>
-      <p1 x="1240" y="620"/>
-      <p2 x="1860" y="620"/>
+      <p1 x="640" y="300"/>
+      <p2 x="680" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="460" y="300"/>
+      <p2 x="520" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="780" y="300"/>
+      <p2 x="980" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="560"/>
+      <p2 x="-200" y="560"/>
+    </wire>
+    <wire>
+      <p1 x="-1120" y="180"/>
+      <p2 x="-1000" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="-200" y="180"/>
+      <p2 x="-100" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="2200" y="180"/>
+      <p2 x="2240" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="180"/>
+      <p2 x="660" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="1360" y="180"/>
+      <p2 x="1380" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="-1080" y="-440"/>
+      <p2 x="-940" y="-440"/>
+    </wire>
+    <wire>
+      <p1 x="-500" y="440"/>
+      <p2 x="-480" y="440"/>
+    </wire>
+    <wire>
+      <p1 x="300" y="440"/>
+      <p2 x="620" y="440"/>
+    </wire>
+    <wire>
+      <p1 x="-720" y="-60"/>
+      <p2 x="-660" y="-60"/>
+    </wire>
+    <wire>
+      <p1 x="-980" y="60"/>
+      <p2 x="-840" y="60"/>
+    </wire>
+    <wire>
+      <p1 x="-240" y="60"/>
+      <p2 x="-180" y="60"/>
+    </wire>
+    <wire>
+      <p1 x="-600" y="60"/>
+      <p2 x="-540" y="60"/>
+    </wire>
+    <wire>
+      <p1 x="440" y="60"/>
+      <p2 x="520" y="60"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="700"/>
+      <p2 x="1040" y="700"/>
+    </wire>
+    <wire>
+      <p1 x="-720" y="-320"/>
+      <p2 x="-700" y="-320"/>
+    </wire>
+    <wire>
+      <p1 x="-1660" y="320"/>
+      <p2 x="-1640" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="-1740" y="320"/>
+      <p2 x="-1720" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="-160" y="320"/>
+      <p2 x="-100" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="320"/>
+      <p2 x="-820" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="-580" y="320"/>
+      <p2 x="-240" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="-1980" y="320"/>
+      <p2 x="-1920" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="320"/>
+      <p2 x="220" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="660" y="320"/>
+      <p2 x="680" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="-960" y="-580"/>
+      <p2 x="220" y="-580"/>
+    </wire>
+    <wire>
+      <p1 x="-1040" y="580"/>
+      <p2 x="-180" y="580"/>
+    </wire>
+    <wire>
+      <p1 x="-720" y="-200"/>
+      <p2 x="-700" y="-200"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="-200"/>
+      <p2 x="-980" y="-200"/>
+    </wire>
+    <wire>
+      <p1 x="-1120" y="200"/>
+      <p2 x="-1100" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="-580" y="200"/>
+      <p2 x="-240" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="-220" y="200"/>
+      <p2 x="-100" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="2200" y="200"/>
+      <p2 x="2300" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="200"/>
+      <p2 x="360" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="800" y="200"/>
+      <p2 x="820" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="-1100" y="200"/>
+      <p2 x="-1020" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="-1100" y="-460"/>
+      <p2 x="-940" y="-460"/>
+    </wire>
+    <wire>
+      <p1 x="-960" y="460"/>
+      <p2 x="-620" y="460"/>
+    </wire>
+    <wire>
+      <p1 x="-2040" y="460"/>
+      <p2 x="-1960" y="460"/>
+    </wire>
+    <wire>
+      <p1 x="-720" y="-80"/>
+      <p2 x="-640" y="-80"/>
+    </wire>
+    <wire>
+      <p1 x="-700" y="80"/>
+      <p2 x="-680" y="80"/>
+    </wire>
+    <wire>
+      <p1 x="-240" y="80"/>
+      <p2 x="-200" y="80"/>
+    </wire>
+    <wire>
+      <p1 x="-620" y="80"/>
+      <p2 x="-540" y="80"/>
+    </wire>
+    <wire>
+      <p1 x="620" y="80"/>
+      <p2 x="680" y="80"/>
+    </wire>
+    <wire>
+      <p1 x="-140" y="340"/>
+      <p2 x="-100" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="-1040" y="340"/>
+      <p2 x="-820" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="-1960" y="340"/>
+      <p2 x="-1920" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="-2120" y="340"/>
+      <p2 x="-1980" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="340"/>
+      <p2 x="240" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="380" y="340"/>
+      <p2 x="640" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="-980" y="-600"/>
+      <p2 x="240" y="-600"/>
+    </wire>
+    <wire>
+      <p1 x="-1060" y="600"/>
+      <p2 x="-160" y="600"/>
+    </wire>
+    <wire>
+      <p1 x="-1000" y="-220"/>
+      <p2 x="-700" y="-220"/>
+    </wire>
+    <wire>
+      <p1 x="-1740" y="220"/>
+      <p2 x="-1540" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-1120" y="220"/>
+      <p2 x="-1080" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-240" y="220"/>
+      <p2 x="-100" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="2200" y="220"/>
+      <p2 x="2300" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="2480" y="220"/>
+      <p2 x="2520" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="780" y="220"/>
+      <p2 x="820" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="960" y="220"/>
+      <p2 x="1060" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="220"/>
+      <p2 x="320" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-1540" y="220"/>
+      <p2 x="-1420" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-1080" y="220"/>
+      <p2 x="-1040" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-720" y="-100"/>
+      <p2 x="-620" y="-100"/>
+    </wire>
+    <wire>
+      <p1 x="-1940" y="100"/>
+      <p2 x="-1560" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="-960" y="100"/>
+      <p2 x="-840" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="-640" y="100"/>
+      <p2 x="-540" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="640" y="100"/>
+      <p2 x="680" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="100"/>
+      <p2 x="260" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="740" y="100"/>
+      <p2 x="780" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="460" y="100"/>
+      <p2 x="520" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="-880" y="740"/>
+      <p2 x="2220" y="740"/>
+    </wire>
+    <wire>
+      <p1 x="-1940" y="360"/>
+      <p2 x="-1920" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="360"/>
+      <p2 x="220" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="360" y="360"/>
+      <p2 x="660" y="360"/>
     </wire>
     <wire>
       <p1 x="-1080" y="620"/>
       <p2 x="-140" y="620"/>
     </wire>
     <wire>
-      <p1 x="1840" y="240"/>
-      <p2 x="1900" y="240"/>
+      <p1 x="1400" y="620"/>
+      <p2 x="1860" y="620"/>
     </wire>
     <wire>
-      <p1 x="1200" y="240"/>
-      <p2 x="1260" y="240"/>
+      <p1 x="780" y="240"/>
+      <p2 x="820" y="240"/>
     </wire>
     <wire>
       <p1 x="-740" y="240"/>
@@ -1346,12 +2203,28 @@ end Behavorial;</string>
       <p2 x="-820" y="240"/>
     </wire>
     <wire>
+      <p1 x="980" y="240"/>
+      <p2 x="1060" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="340" y="240"/>
+      <p2 x="520" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="240"/>
+      <p2 x="300" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="1840" y="240"/>
+      <p2 x="1900" y="240"/>
+    </wire>
+    <wire>
       <p1 x="-580" y="240"/>
       <p2 x="-560" y="240"/>
     </wire>
     <wire>
-      <p1 x="-1020" y="560"/>
-      <p2 x="-200" y="560"/>
+      <p1 x="-980" y="-500"/>
+      <p2 x="-940" y="-500"/>
     </wire>
     <wire>
       <p1 x="-980" y="500"/>
@@ -1363,35 +2236,35 @@ end Behavorial;</string>
     </wire>
     <wire>
       <p1 x="-620" y="500"/>
-      <p2 x="-120" y="500"/>
+      <p2 x="-500" y="500"/>
     </wire>
     <wire>
-      <p1 x="-1120" y="180"/>
-      <p2 x="-1000" y="180"/>
-    </wire>
-    <wire>
-      <p1 x="-200" y="180"/>
-      <p2 x="-100" y="180"/>
-    </wire>
-    <wire>
-      <p1 x="2200" y="180"/>
-      <p2 x="2240" y="180"/>
+      <p1 x="-720" y="-120"/>
+      <p2 x="-600" y="-120"/>
     </wire>
     <wire>
       <p1 x="-900" y="760"/>
       <p2 x="2240" y="760"/>
     </wire>
     <wire>
-      <p1 x="-980" y="60"/>
-      <p2 x="-840" y="60"/>
+      <p1 x="660" y="120"/>
+      <p2 x="680" y="120"/>
     </wire>
     <wire>
-      <p1 x="-240" y="60"/>
-      <p2 x="-180" y="60"/>
+      <p1 x="200" y="120"/>
+      <p2 x="340" y="120"/>
     </wire>
     <wire>
-      <p1 x="2240" y="180"/>
-      <p2 x="2240" y="760"/>
+      <p1 x="-1020" y="-380"/>
+      <p2 x="-700" y="-380"/>
+    </wire>
+    <wire>
+      <p1 x="640" y="300"/>
+      <p2 x="640" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="640" y="100"/>
+      <p2 x="640" y="140"/>
     </wire>
     <wire>
       <p1 x="-1540" y="220"/>
@@ -1402,56 +2275,24 @@ end Behavorial;</string>
       <p2 x="-1540" y="300"/>
     </wire>
     <wire>
-      <p1 x="-580" y="260"/>
-      <p2 x="-580" y="280"/>
-    </wire>
-    <wire>
-      <p1 x="-580" y="200"/>
-      <p2 x="-580" y="240"/>
-    </wire>
-    <wire>
-      <p1 x="-580" y="280"/>
-      <p2 x="-580" y="320"/>
-    </wire>
-    <wire>
       <p1 x="-900" y="280"/>
       <p2 x="-900" y="760"/>
     </wire>
     <wire>
-      <p1 x="1220" y="280"/>
-      <p2 x="1220" y="640"/>
-    </wire>
-    <wire>
-      <p1 x="1860" y="260"/>
-      <p2 x="1860" y="620"/>
-    </wire>
-    <wire>
-      <p1 x="260" y="320"/>
-      <p2 x="260" y="600"/>
-    </wire>
-    <wire>
-      <p1 x="-1480" y="260"/>
-      <p2 x="-1480" y="280"/>
-    </wire>
-    <wire>
-      <p1 x="-200" y="280"/>
-      <p2 x="-200" y="560"/>
-    </wire>
-    <wire>
-      <p1 x="-200" y="80"/>
-      <p2 x="-200" y="180"/>
-    </wire>
-    <wire>
-      <p1 x="840" y="260"/>
-      <p2 x="840" y="600"/>
-    </wire>
-    <wire>
-      <p1 x="-1740" y="160"/>
-      <p2 x="-1740" y="220"/>
+      <p1 x="260" y="40"/>
+      <p2 x="260" y="100"/>
     </wire>
     <wire>
       <p1 x="-140" y="340"/>
       <p2 x="-140" y="620"/>
+    </wire>
+    <wire>
+      <p1 x="780" y="240"/>
+      <p2 x="780" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="780" y="100"/>
+      <p2 x="780" y="220"/>
     </wire>
     <wire>
       <p1 x="-1040" y="220"/>
@@ -1462,12 +2303,8 @@ end Behavorial;</string>
       <p2 x="-1040" y="580"/>
     </wire>
     <wire>
-      <p1 x="-980" y="160"/>
-      <p2 x="-980" y="500"/>
-    </wire>
-    <wire>
-      <p1 x="-980" y="60"/>
-      <p2 x="-980" y="140"/>
+      <p1 x="1040" y="300"/>
+      <p2 x="1040" y="700"/>
     </wire>
     <wire>
       <p1 x="-1940" y="360"/>
@@ -1478,40 +2315,24 @@ end Behavorial;</string>
       <p2 x="-1940" y="280"/>
     </wire>
     <wire>
+      <p1 x="-660" y="-60"/>
+      <p2 x="-660" y="400"/>
+    </wire>
+    <wire>
+      <p1 x="660" y="120"/>
+      <p2 x="660" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="660" y="320"/>
+      <p2 x="660" y="360"/>
+    </wire>
+    <wire>
       <p1 x="-1560" y="100"/>
       <p2 x="-1560" y="160"/>
     </wire>
     <wire>
       <p1 x="-920" y="240"/>
       <p2 x="-920" y="800"/>
-    </wire>
-    <wire>
-      <p1 x="1880" y="280"/>
-      <p2 x="1880" y="640"/>
-    </wire>
-    <wire>
-      <p1 x="1240" y="260"/>
-      <p2 x="1240" y="620"/>
-    </wire>
-    <wire>
-      <p1 x="2520" y="220"/>
-      <p2 x="2520" y="800"/>
-    </wire>
-    <wire>
-      <p1 x="-220" y="260"/>
-      <p2 x="-220" y="540"/>
-    </wire>
-    <wire>
-      <p1 x="-220" y="140"/>
-      <p2 x="-220" y="200"/>
-    </wire>
-    <wire>
-      <p1 x="220" y="360"/>
-      <p2 x="220" y="640"/>
-    </wire>
-    <wire>
-      <p1 x="860" y="280"/>
-      <p2 x="860" y="620"/>
     </wire>
     <wire>
       <p1 x="-160" y="320"/>
@@ -1522,16 +2343,16 @@ end Behavorial;</string>
       <p2 x="-160" y="140"/>
     </wire>
     <wire>
+      <p1 x="800" y="200"/>
+      <p2 x="800" y="420"/>
+    </wire>
+    <wire>
       <p1 x="-1700" y="300"/>
       <p2 x="-1700" y="400"/>
     </wire>
     <wire>
       <p1 x="-1060" y="240"/>
       <p2 x="-1060" y="600"/>
-    </wire>
-    <wire>
-      <p1 x="-1000" y="180"/>
-      <p2 x="-1000" y="540"/>
     </wire>
     <wire>
       <p1 x="-1960" y="340"/>
@@ -1542,40 +2363,16 @@ end Behavorial;</string>
       <p2 x="-680" y="80"/>
     </wire>
     <wire>
-      <p1 x="-620" y="460"/>
-      <p2 x="-620" y="500"/>
-    </wire>
-    <wire>
-      <p1 x="1260" y="240"/>
-      <p2 x="1260" y="600"/>
-    </wire>
-    <wire>
       <p1 x="2220" y="260"/>
       <p2 x="2220" y="740"/>
     </wire>
     <wire>
-      <p1 x="-240" y="240"/>
-      <p2 x="-240" y="320"/>
+      <p1 x="300" y="240"/>
+      <p2 x="300" y="440"/>
     </wire>
     <wire>
-      <p1 x="-240" y="200"/>
-      <p2 x="-240" y="220"/>
-    </wire>
-    <wire>
-      <p1 x="-880" y="260"/>
-      <p2 x="-880" y="740"/>
-    </wire>
-    <wire>
-      <p1 x="880" y="300"/>
-      <p2 x="880" y="640"/>
-    </wire>
-    <wire>
-      <p1 x="240" y="340"/>
-      <p2 x="240" y="620"/>
-    </wire>
-    <wire>
-      <p1 x="1840" y="240"/>
-      <p2 x="1840" y="600"/>
+      <p1 x="1840" y="-20"/>
+      <p2 x="1840" y="240"/>
     </wire>
     <wire>
       <p1 x="-180" y="300"/>
@@ -1594,20 +2391,16 @@ end Behavorial;</string>
       <p2 x="-1080" y="620"/>
     </wire>
     <wire>
-      <p1 x="-120" y="360"/>
-      <p2 x="-120" y="500"/>
+      <p1 x="-1080" y="-440"/>
+      <p2 x="-1080" y="220"/>
     </wire>
     <wire>
-      <p1 x="-1660" y="320"/>
-      <p2 x="-1660" y="380"/>
+      <p1 x="440" y="-20"/>
+      <p2 x="440" y="60"/>
     </wire>
     <wire>
-      <p1 x="-1020" y="200"/>
-      <p2 x="-1020" y="320"/>
-    </wire>
-    <wire>
-      <p1 x="-1020" y="320"/>
-      <p2 x="-1020" y="560"/>
+      <p1 x="440" y="60"/>
+      <p2 x="440" y="260"/>
     </wire>
     <wire>
       <p1 x="-1980" y="320"/>
@@ -1618,8 +2411,216 @@ end Behavorial;</string>
       <p2 x="-1980" y="300"/>
     </wire>
     <wire>
+      <p1 x="-700" y="-220"/>
+      <p2 x="-700" y="-200"/>
+    </wire>
+    <wire>
+      <p1 x="-700" y="-380"/>
+      <p2 x="-700" y="-320"/>
+    </wire>
+    <wire>
       <p1 x="-960" y="100"/>
       <p2 x="-960" y="460"/>
+    </wire>
+    <wire>
+      <p1 x="-960" y="-580"/>
+      <p2 x="-960" y="-520"/>
+    </wire>
+    <wire>
+      <p1 x="2240" y="180"/>
+      <p2 x="2240" y="760"/>
+    </wire>
+    <wire>
+      <p1 x="320" y="220"/>
+      <p2 x="320" y="420"/>
+    </wire>
+    <wire>
+      <p1 x="-580" y="260"/>
+      <p2 x="-580" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="-580" y="200"/>
+      <p2 x="-580" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="-580" y="280"/>
+      <p2 x="-580" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="1860" y="260"/>
+      <p2 x="1860" y="620"/>
+    </wire>
+    <wire>
+      <p1 x="-1480" y="260"/>
+      <p2 x="-1480" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="-200" y="280"/>
+      <p2 x="-200" y="560"/>
+    </wire>
+    <wire>
+      <p1 x="-200" y="80"/>
+      <p2 x="-200" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="380"/>
+      <p2 x="200" y="700"/>
+    </wire>
+    <wire>
+      <p1 x="-1740" y="160"/>
+      <p2 x="-1740" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-1100" y="-460"/>
+      <p2 x="-1100" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="460" y="100"/>
+      <p2 x="460" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="460" y="300"/>
+      <p2 x="460" y="800"/>
+    </wire>
+    <wire>
+      <p1 x="-980" y="160"/>
+      <p2 x="-980" y="500"/>
+    </wire>
+    <wire>
+      <p1 x="-980" y="60"/>
+      <p2 x="-980" y="140"/>
+    </wire>
+    <wire>
+      <p1 x="-980" y="-600"/>
+      <p2 x="-980" y="-500"/>
+    </wire>
+    <wire>
+      <p1 x="980" y="240"/>
+      <p2 x="980" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="340" y="120"/>
+      <p2 x="340" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="340" y="260"/>
+      <p2 x="340" y="400"/>
+    </wire>
+    <wire>
+      <p1 x="-600" y="-120"/>
+      <p2 x="-600" y="60"/>
+    </wire>
+    <wire>
+      <p1 x="1880" y="280"/>
+      <p2 x="1880" y="640"/>
+    </wire>
+    <wire>
+      <p1 x="2520" y="220"/>
+      <p2 x="2520" y="800"/>
+    </wire>
+    <wire>
+      <p1 x="-220" y="260"/>
+      <p2 x="-220" y="540"/>
+    </wire>
+    <wire>
+      <p1 x="-220" y="140"/>
+      <p2 x="-220" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="220" y="-580"/>
+      <p2 x="220" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="220" y="360"/>
+      <p2 x="220" y="680"/>
+    </wire>
+    <wire>
+      <p1 x="1380" y="-20"/>
+      <p2 x="1380" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="1380" y="280"/>
+      <p2 x="1380" y="640"/>
+    </wire>
+    <wire>
+      <p1 x="-1000" y="180"/>
+      <p2 x="-1000" y="540"/>
+    </wire>
+    <wire>
+      <p1 x="-1000" y="-300"/>
+      <p2 x="-1000" y="-220"/>
+    </wire>
+    <wire>
+      <p1 x="1000" y="260"/>
+      <p2 x="1000" y="660"/>
+    </wire>
+    <wire>
+      <p1 x="360" y="200"/>
+      <p2 x="360" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="-620" y="460"/>
+      <p2 x="-620" y="500"/>
+    </wire>
+    <wire>
+      <p1 x="-620" y="-100"/>
+      <p2 x="-620" y="80"/>
+    </wire>
+    <wire>
+      <p1 x="-240" y="240"/>
+      <p2 x="-240" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="-240" y="200"/>
+      <p2 x="-240" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-880" y="260"/>
+      <p2 x="-880" y="740"/>
+    </wire>
+    <wire>
+      <p1 x="240" y="-600"/>
+      <p2 x="240" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="240" y="340"/>
+      <p2 x="240" y="660"/>
+    </wire>
+    <wire>
+      <p1 x="-500" y="440"/>
+      <p2 x="-500" y="500"/>
+    </wire>
+    <wire>
+      <p1 x="1400" y="260"/>
+      <p2 x="1400" y="620"/>
+    </wire>
+    <wire>
+      <p1 x="-1660" y="320"/>
+      <p2 x="-1660" y="380"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="200"/>
+      <p2 x="-1020" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="-380"/>
+      <p2 x="-1020" y="-200"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="320"/>
+      <p2 x="-1020" y="560"/>
+    </wire>
+    <wire>
+      <p1 x="1020" y="280"/>
+      <p2 x="1020" y="680"/>
+    </wire>
+    <wire>
+      <p1 x="380" y="160"/>
+      <p2 x="380" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="-640" y="-80"/>
+      <p2 x="-640" y="100"/>
     </wire>
   </wires>
   <measurementOrdering/>
