@@ -12,7 +12,7 @@
         </entry>
         <entry>
           <string>Label</string>
-          <string>PCPlusFour</string>
+          <string>PCPlusOne</string>
         </entry>
         <entry>
           <string>externalInputs</string>
@@ -24,16 +24,16 @@
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity PCPlusFour is
+entity PCPlusOne is
     Port (
         PC        : in  STD_LOGIC_VECTOR(31 downto 0);
         Next_PC   : out  STD_LOGIC_VECTOR(31 downto 0)
     );
-end PCPlusFour;
+end PCPlusOne;
 
-architecture Behavioral of PCPlusFour is
+architecture Behavioral of PCPlusOne is
 begin
-	Next_PC &lt;= std_logic_vector(unsigned(PC) + 4);
+	Next_PC &lt;= std_logic_vector(unsigned(PC) + 1);
 end Behavioral;</string>
         </entry>
         <entry>
@@ -203,17 +203,17 @@ begin
 
         when &quot;0010011&quot; | &quot;1100111&quot; | &quot;0000011&quot; =&gt;
 		-- I type
-		Immediate &lt;= (others =&gt; Instruction (31));
+		Immediate(31 downto 12) &lt;= (others =&gt; Instruction (31)); --bit de sinal
 		Immediate (11 downto 0) &lt;= Instruction (31 downto 20);
 
         when &quot;0010111&quot; | &quot;0110111&quot; =&gt; 
             	-- U type
-            	Immediate &lt;= (others =&gt; &apos;0&apos;);
+            	Immediate (11 downto 0) &lt;= (others =&gt; &apos;0&apos;);
 		Immediate (31 downto 12) &lt;= Instruction (31 downto 12);
 
         when &quot;1100011&quot; =&gt; 
             	-- SB type
-		Immediate &lt;= (others =&gt; Instruction (31));
+		Immediate (31 downto 12) &lt;= (others =&gt; Instruction (31)); --bit de sinal
 		Immediate (0) &lt;= &apos;0&apos;;
 		Immediate (11) &lt;= Instruction (7);
 		Immediate (4 downto 1) &lt;= Instruction (11 downto 8);
@@ -221,7 +221,7 @@ begin
 
         when &quot;1101111&quot; =&gt; 
             	-- UJ type
-		Immediate &lt;= (others =&gt; Instruction (31));
+		Immediate (31 downto 20) &lt;= (others =&gt; Instruction (31));
 		Immediate (0) &lt;= &apos;0&apos;;
 		Immediate (11) &lt;= Instruction (20);
 		Immediate (19 downto 12) &lt;= Instruction (19 downto 12);
@@ -229,7 +229,7 @@ begin
             	
         when &quot;0100011&quot; =&gt; 
            	 -- S type
-            	Immediate &lt;= (others =&gt; Instruction (31));
+            	Immediate (31 downto 12) &lt;= (others =&gt; Instruction (31));
 		Immediate (11 downto 5) &lt;= Instruction (31 downto 25);
 		Immediate (4 downto 0) &lt;= Instruction (11 downto 7);
 
@@ -1009,7 +1009,7 @@ begin
         variable MemWrite : std_logic;
         variable RegWrite : std_logic;
         variable MemToReg : std_logic;
-        variable imm4     : std_logic;
+        variable imm1     : std_logic;
         variable isJAL    : std_logic;
         variable isBEQ    : std_logic;
         variable isBNE    : std_logic;
@@ -1023,14 +1023,14 @@ begin
         MemWrite  := &apos;0&apos;;
         RegWrite  := &apos;0&apos;;
         MemToReg  := &apos;0&apos;;
-        imm4      := &apos;0&apos;;
+        imm1      := &apos;0&apos;;
         isJAL     := &apos;0&apos;;
         isBEQ     := &apos;0&apos;;
         isBNE     := &apos;0&apos;;
         isJALR    := &apos;0&apos;;
 
         if JALR_2ndCycle = &apos;1&apos; then
-            imm4        := &apos;1&apos;;           -- força imediato 4
+            imm1        := &apos;1&apos;;           -- força imediato 1
             ALUOp       := &quot;11&quot;;          -- ALUOp=00, SrcB=1, SrcA=11 (PC+4)
             ALUSrcA     := &quot;01&quot;;
             ALUSrcB     := &apos;1&apos;;
@@ -1085,7 +1085,7 @@ begin
                     ALUOp     := &quot;11&quot;;
                     ALUSrcB   := &apos;1&apos;;
                     ALUSrcA   := &quot;01&quot;; -- PC + Imm
-                    imm4      := &apos;1&apos;;
+                    imm1      := &apos;1&apos;;
                     isJAL     := &apos;1&apos;;
 
                 when &quot;1100111&quot; =&gt; -- jalr
@@ -1116,7 +1116,7 @@ begin
         EXSignals  &lt;= ALUOp &amp; ALUSrcB &amp; ALUSrcA;
         MEMSignals &lt;= MemWrite &amp; MemRead;
         WBSignals  &lt;= RegWrite &amp; MemToReg;
-        ImmSrc     &lt;= imm4;
+        ImmSrc     &lt;= imm1;
         JAL        &lt;= isJAL;
         BranchEQ   &lt;= isBEQ;
         BranchNEQ  &lt;= isBNE;
@@ -1225,7 +1225,9 @@ begin
     begin
         case SEL is
             when &apos;0&apos;   =&gt; imm_out &lt;= imm_in;
-            when others =&gt; imm_out &lt;= std_logic_vector(to_unsigned(4, imm_out&apos;length));
+            when others =&gt;
+		imm_out(0) &lt;= &apos;1&apos;;
+		imm_out(31 downto 1) &lt;= (others =&gt; &apos;0&apos;);
         end case;
     end process;
 
