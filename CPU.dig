@@ -759,7 +759,7 @@ end Behavorial;</string>
         </entry>
         <entry>
           <string>externalInputs</string>
-          <string>PCplus4:32,ID_result:32,EX_result:32,S1,S2</string>
+          <string>PCplus1:32,ID_result:32,EX_result:32,S1,S2,clk</string>
         </entry>
         <entry>
           <string>Code</string>
@@ -768,12 +768,13 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity PCSrc is
     Port (
-        PCplus4 	: in  std_logic_vector(31 downto 0); -- Entrada de dados 0
+        PCplus1 	: in  std_logic_vector(31 downto 0); -- Entrada de dados 0
         ID_result  	: in  std_logic_vector(31 downto 0); -- Entrada de dados 1
         EX_result	: in  std_logic_vector(31 downto 0); -- Entrada de dados 2
         S1 		: in  std_logic; -- Linha de seleção
         S2 		: in  std_logic; -- Linha de seleção
-        NextPC 		: out std_logic_vector(31 downto 0)  -- Saída de dados
+        NextPC 		: out std_logic_vector(31 downto 0);  -- Saída de dados
+        clk		: in  STD_LOGIC
     );
 end PCSrc;
 
@@ -781,10 +782,10 @@ architecture Behavorial of PCSrc is
 signal SEL : std_logic_vector(1 downto 0);
 begin
 SEL &lt;= S1&amp;S2;
-    process(PCplus4, ID_result, EX_result, S1, S2)
+    process(PCplus1, ID_result, EX_result, S1, S2, clk)
     begin
         case SEL is
-            when &quot;00&quot;   =&gt; NextPC &lt;= PCplus4;
+            when &quot;00&quot;   =&gt; NextPC &lt;= PCplus1;
             when &quot;01&quot;   =&gt; NextPC &lt;= ID_result;
             when &quot;10&quot;   =&gt; NextPC &lt;= EX_result;
             when others =&gt; NextPC &lt;= (others =&gt; &apos;0&apos;); -- valores incorretos
@@ -838,8 +839,8 @@ begin
     process(MemOutput, ALUOutput, SEL)
     begin
         case SEL is
-            when &apos;0&apos;   =&gt; DataOut &lt;= MemOutput;
-            when &apos;1&apos;   =&gt; DataOut &lt;= ALUOutput;
+            when &apos;1&apos;   =&gt; DataOut &lt;= MemOutput;
+            when &apos;0&apos;   =&gt; DataOut &lt;= ALUOutput;
             when others =&gt; DataOut &lt;= (others =&gt; &apos;0&apos;); -- Cobre o caso &quot;11&quot; e outros possíveis (U, X, etc.)
         end case;
     end process;
@@ -941,152 +942,120 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity Control is
     Port (
-        JALR_2ndCycle : in  std_logic; -- Entrada especial
-        Instr        : in  std_logic_vector(31 downto 0); -- instrução completa
+        JALR_2ndCycle : in  std_logic;
+        Instr         : in  std_logic_vector(31 downto 0);
 
-        JALR         : out std_logic;
-        JAL          : out std_logic;
-        BranchEQ     : out std_logic;
-        BranchNEQ    : out std_logic;
-        EXSignals    : out std_logic_vector(4 downto 0);	-- ALUOp(2), ALUSrcB, ALUSrcA(2)
-        MEMSignals   : out std_logic_vector(1 downto 0);	-- MemWrite, MemRead
-        WBSignals    : out std_logic_vector(1 downto 0);	-- RegWrite, MemToReg
-        ImmSrc       : out std_logic                     	-- 0 = IMM_GEN, 1 = 4
+        JAL           : out std_logic;
+        JALR          : out std_logic;
+        BranchEQ      : out std_logic;
+        BranchNEQ     : out std_logic;
+        EXSignals     : out std_logic_vector(4 downto 0);
+        MEMSignals    : out std_logic_vector(1 downto 0);
+        WBSignals     : out std_logic_vector(1 downto 0);
+        ImmSrc        : out std_logic
     );
 end Control;
 
 architecture Behavioral of Control is
-    signal opcode : std_logic_vector(6 downto 0);
+    signal opcode    : std_logic_vector(6 downto 0);
+    signal funct3    : std_logic_vector(2 downto 0);
+
+    -- Sinais intermediários
+    signal ALUOp     : std_logic_vector(1 downto 0);
+    signal ALUSrcA   : std_logic_vector(1 downto 0);
+    signal ALUSrcB   : std_logic;
+    signal MemRead   : std_logic;
+    signal MemWrite  : std_logic;
+    signal RegWrite  : std_logic;
+    signal MemToReg  : std_logic;
+    signal imm1      : std_logic;
+    signal isJAL     : std_logic;
+    signal isBEQ     : std_logic;
+    signal isBNE     : std_logic;
+    signal isJALR    : std_logic;
 begin
-    opcode &lt;= Instr(6 downto 0);  -- extrai opcode da instrução
 
-    process(Instr,JALR_2ndCycle)
-        -- sinais temporários
-        variable ALUOp    : std_logic_vector(1 downto 0);
-        variable ALUSrcA  : std_logic_vector(1 downto 0);
-        variable ALUSrcB  : std_logic;
-        variable MemRead  : std_logic;
-        variable MemWrite : std_logic;
-        variable RegWrite : std_logic;
-        variable MemToReg : std_logic;
-        variable imm1     : std_logic;
-        variable isJAL    : std_logic;
-        variable isBEQ    : std_logic;
-        variable isBNE    : std_logic;
-        variable isJALR   : std_logic;
-    begin
-        -- valores padrão
-        ALUOp     := &quot;00&quot;;
-        ALUSrcA   := &quot;00&quot;;
-        ALUSrcB   := &apos;0&apos;;
-        MemRead   := &apos;0&apos;;
-        MemWrite  := &apos;0&apos;;
-        RegWrite  := &apos;0&apos;;
-        MemToReg  := &apos;0&apos;;
-        imm1      := &apos;0&apos;;
-        isJAL     := &apos;0&apos;;
-        isBEQ     := &apos;0&apos;;
-        isBNE     := &apos;0&apos;;
-        isJALR    := &apos;0&apos;;
+    opcode &lt;= Instr(6 downto 0);
+    funct3 &lt;= Instr(14 downto 12);
 
-        if JALR_2ndCycle = &apos;1&apos; then
-            imm1        := &apos;1&apos;;           -- força imediato 1
-            ALUOp       := &quot;11&quot;;          -- ALUOp=00, SrcB=1, SrcA=11 (PC+4)
-            ALUSrcA     := &quot;01&quot;;
-            ALUSrcB     := &apos;1&apos;;
-            MemWrite    := &apos;0&apos;;           -- sem memória
-            MemRead     := &apos;0&apos;;
-            RegWrite    := &apos;1&apos;;           -- escreve registrador, via ALU
-            MemToReg    := &apos;0&apos;;
-            isJAL       := &apos;0&apos;;
-            isBEQ       := &apos;0&apos;;
-            isBNE       := &apos;0&apos;;
-				    isJALR      := &apos;0&apos;;           -- garante que pipeline não fica presa em JALR
-				 else
-            case opcode is
-                when &quot;0110011&quot; =&gt; -- R-type: add, sub, and, or, xor, sll, srl
-                    RegWrite  := &apos;1&apos;;
-                    ALUOp     := &quot;01&quot;;
-                    ALUSrcB   := &apos;0&apos;;
-                    ALUSrcA   := &quot;00&quot;;
+    -- Sinais default
+    ALUOp     &lt;= &quot;11&quot; when JALR_2ndCycle = &apos;1&apos; else
+                 &quot;01&quot; when opcode = &quot;0110011&quot; else  -- R-type
+                 &quot;10&quot; when opcode = &quot;0010011&quot; else  -- I-type
+                 &quot;11&quot; when opcode = &quot;0000011&quot; or    -- lw
+                           opcode = &quot;0100011&quot; or -- sw
+                           opcode = &quot;1101111&quot; or -- jal
+                           opcode = &quot;1100111&quot; or -- jalr
+                           opcode = &quot;0010111&quot; or -- auipc
+                           opcode = &quot;0110111&quot;    -- lui
+                 else &quot;00&quot;;
 
-                when &quot;0010011&quot; =&gt; -- I-type: addi, andi, ori, xori, slli, srli
-                    RegWrite  := &apos;1&apos;;
-                    ALUOp     := &quot;10&quot;;
-                    ALUSrcB   := &apos;1&apos;;
-                    ALUSrcA   := &quot;00&quot;;
+    ALUSrcA &lt;= &quot;01&quot; when JALR_2ndCycle = &apos;1&apos; else
+               &quot;00&quot; when opcode = &quot;0110011&quot; or  -- R-type
+                            opcode = &quot;0010011&quot; or
+                            opcode = &quot;0000011&quot; or
+                            opcode = &quot;0100011&quot; or
+                            opcode = &quot;1100111&quot;    -- jalr
+               else
+               &quot;01&quot; when opcode = &quot;1101111&quot; or   -- jal
+                                opcode = &quot;0010111&quot; -- auipc
+               else
+               &quot;10&quot; when opcode = &quot;0110111&quot;       -- lui
+               else &quot;00&quot;;
 
-                when &quot;0000011&quot; =&gt; -- lw
-                    RegWrite  := &apos;1&apos;;
-                    MemRead   := &apos;1&apos;;
-                    MemToReg  := &apos;1&apos;;
-                    ALUOp     := &quot;11&quot;;
-                    ALUSrcB   := &apos;1&apos;;
-                    ALUSrcA   := &quot;00&quot;;
+    ALUSrcB &lt;= &apos;1&apos; when JALR_2ndCycle = &apos;1&apos; or
+                        opcode = &quot;0010011&quot; or -- I-type
+                        opcode = &quot;0000011&quot; or -- lw
+                        opcode = &quot;0100011&quot; or -- sw
+                        opcode = &quot;1101111&quot; or -- jal
+                        opcode = &quot;1100111&quot; or -- jalr
+                        opcode = &quot;0010111&quot; or -- auipc
+                        opcode = &quot;0110111&quot;    -- lui
+               else &apos;0&apos;;
 
-                when &quot;0100011&quot; =&gt; -- sw
-                    MemWrite  := &apos;1&apos;;
-                    ALUOp     := &quot;11&quot;;
-                    ALUSrcB   := &apos;1&apos;;
-                    ALUSrcA   := &quot;00&quot;;
+    MemRead &lt;= &apos;0&apos; when JALR_2ndCycle = &apos;1&apos; else
+               &apos;1&apos; when opcode = &quot;0000011&quot; else
+               &apos;0&apos;;
 
-                when &quot;1100011&quot; =&gt; -- beq, bne
-                    ALUOp     := &quot;00&quot;; -- don&apos;t care
-                    ALUSrcB   := &apos;0&apos;;  -- don&apos;t care
-                    ALUSrcA   := &quot;00&quot;; -- don&apos;t care
-                    case Instr(14 downto 12) is -- funct3
-                        when &quot;000&quot; =&gt; isBEQ := &apos;1&apos;;  -- beq
-                        when &quot;001&quot; =&gt; isBNE := &apos;1&apos;;  -- bne
-                        when others =&gt; null;
-                    end case;
+    MemWrite &lt;= &apos;0&apos; when JALR_2ndCycle = &apos;1&apos; else
+                &apos;1&apos; when opcode = &quot;0100011&quot; else
+                &apos;0&apos;;
 
-                when &quot;1101111&quot; =&gt; -- jal
-                    RegWrite  := &apos;1&apos;;
-                    ALUOp     := &quot;11&quot;;
-                    ALUSrcB   := &apos;1&apos;;
-                    ALUSrcA   := &quot;01&quot;; -- PC + Imm
-                    imm1      := &apos;1&apos;;
-                    isJAL     := &apos;1&apos;;
+    RegWrite &lt;= &apos;1&apos; when JALR_2ndCycle = &apos;1&apos; else
+                &apos;1&apos; when opcode = &quot;0110011&quot; or -- R-type
+                                 opcode = &quot;0010011&quot; or -- I-type
+                                 opcode = &quot;0000011&quot; or -- lw
+                                 opcode = &quot;1101111&quot; or -- jal
+                                 opcode = &quot;0010111&quot; or -- auipc
+                                 opcode = &quot;0110111&quot;    -- lui
+                else &apos;0&apos;;
 
-                when &quot;1100111&quot; =&gt; -- jalr
-                    RegWrite  := &apos;0&apos;;
-                    ALUOp     := &quot;11&quot;;
-                    ALUSrcB   := &apos;1&apos;;
-                    ALUSrcA   := &quot;00&quot;; -- rs1 + Imm
-                    isJALR    := &apos;1&apos;;
+    MemToReg &lt;= &apos;1&apos; when JALR_2ndCycle = &apos;0&apos; and opcode = &quot;0000011&quot; else &apos;0&apos;;
 
-                when &quot;0010111&quot; =&gt; -- auipc
-                    RegWrite  := &apos;1&apos;;
-                    ALUOp     := &quot;11&quot;;
-                    ALUSrcB   := &apos;1&apos;;
-                    ALUSrcA   := &quot;01&quot;; -- PC + Imm
+    imm1 &lt;= &apos;1&apos; when JALR_2ndCycle = &apos;1&apos; or opcode = &quot;1101111&quot; else &apos;0&apos;;
 
-                when &quot;0110111&quot; =&gt; -- lui
-                    RegWrite  := &apos;1&apos;;
-                    ALUOp     := &quot;11&quot;;
-                    ALUSrcB   := &apos;1&apos;;
-                    ALUSrcA   := &quot;10&quot;;
+    isJAL  &lt;= &apos;1&apos; when JALR_2ndCycle = &apos;0&apos; and opcode = &quot;1101111&quot; else &apos;0&apos;;
 
-                when others =&gt;
-                    -- valores padrão
-            end case;
-        end if;
+    isJALR &lt;= &apos;1&apos; when JALR_2ndCycle = &apos;0&apos; and opcode = &quot;1100111&quot; else &apos;0&apos;;
 
-        -- atribuição final aos sinais de saída
-        EXSignals  &lt;= ALUOp &amp; ALUSrcB &amp; ALUSrcA;
-        MEMSignals &lt;= MemWrite &amp; MemRead;
-        WBSignals  &lt;= RegWrite &amp; MemToReg;
-        ImmSrc     &lt;= imm1;
-        JAL        &lt;= isJAL;
-        BranchEQ   &lt;= isBEQ;
-        BranchNEQ  &lt;= isBNE;
-        JALR       &lt;= isJALR;
-    end process;
-end Behavioral;</string>
+    isBEQ  &lt;= &apos;1&apos; when JALR_2ndCycle = &apos;0&apos; and opcode = &quot;1100011&quot; and funct3 = &quot;000&quot; else &apos;0&apos;;
+    isBNE  &lt;= &apos;1&apos; when JALR_2ndCycle = &apos;0&apos; and opcode = &quot;1100011&quot; and funct3 = &quot;001&quot; else &apos;0&apos;;
+
+    -- Atribuições finais
+    EXSignals  &lt;= ALUOp &amp; ALUSrcB &amp; ALUSrcA;
+    MEMSignals &lt;= MemWrite &amp; MemRead;
+    WBSignals  &lt;= RegWrite &amp; MemToReg;
+    ImmSrc     &lt;= imm1;
+    JAL        &lt;= isJAL;
+    JALR       &lt;= isJALR;
+    BranchEQ   &lt;= isBEQ;
+    BranchNEQ  &lt;= isBNE;
+
+end Behavioral;</string>
         </entry>
         <entry>
           <string>externalOutputs</string>
-          <string>JALR,JAL,BranchEQ,BranchNEQ,EXSignals:5,MEMSignals:2,WBSignals:2,ImmSrc</string>
+          <string>JAL,JALR,BranchEQ,BranchNEQ,EXSignals:5,MEMSignals:2,WBSignals:2,ImmSrc</string>
         </entry>
         <entry>
           <string>Width</string>
@@ -1762,7 +1731,7 @@ end Behavioral;</string>
           <int>7</int>
         </entry>
       </elementAttributes>
-      <pos x="-1700" y="280"/>
+      <pos x="-1700" y="300"/>
     </visualElement>
     <visualElement>
       <elementName>ROM</elementName>
@@ -1778,6 +1747,10 @@ end Behavioral;</string>
         <entry>
           <string>Bits</string>
           <int>32</int>
+        </entry>
+        <entry>
+          <string>Data</string>
+          <data>0,800093,7*0,100563</data>
         </entry>
       </elementAttributes>
       <pos x="-1520" y="340"/>
@@ -1847,6 +1820,339 @@ end Behavioral;</string>
         </entry>
       </elementAttributes>
       <pos x="-2160" y="-360"/>
+    </visualElement>
+    <visualElement>
+      <elementName>VDD</elementName>
+      <elementAttributes/>
+      <pos x="-1540" y="420"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>NetName</string>
+          <string>CLK</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-1860" y="-440"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes/>
+      <pos x="-1900" y="-440"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>NetName</string>
+          <string>RST</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-1860" y="-380"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes/>
+      <pos x="-1900" y="-380"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>RST</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-1420" y="140"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>CLK</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-1420" y="160"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>CLK</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-980" y="-340"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>CLK</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-1700" y="320"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>CLK</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-100" y="120"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>CLK</string>
+        </entry>
+      </elementAttributes>
+      <pos x="1060" y="200"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>CLK</string>
+        </entry>
+      </elementAttributes>
+      <pos x="1500" y="160"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>CLK</string>
+        </entry>
+      </elementAttributes>
+      <pos x="1900" y="200"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>RST</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-980" y="-320"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>RST</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-820" y="360"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>RST</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-100" y="100"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>RST</string>
+        </entry>
+      </elementAttributes>
+      <pos x="1060" y="180"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>RST</string>
+        </entry>
+      </elementAttributes>
+      <pos x="1900" y="180"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>CLK</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-820" y="300"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>RST</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-1700" y="300"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-1340" y="360"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="1000" y="100"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="1780" y="260"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="2580" y="240"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Bits</string>
+          <int>5</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-220" y="-140"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-1640" y="460"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-1000" y="-40"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>CLK</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-1920" y="400"/>
     </visualElement>
   </visualElements>
   <wires>
@@ -1995,10 +2301,6 @@ end Behavioral;</string>
       <p2 x="280" y="280"/>
     </wire>
     <wire>
-      <p1 x="-1560" y="280"/>
-      <p2 x="-1540" y="280"/>
-    </wire>
-    <wire>
       <p1 x="-1000" y="540"/>
       <p2 x="-220" y="540"/>
     </wire>
@@ -2055,8 +2357,16 @@ end Behavioral;</string>
       <p2 x="620" y="420"/>
     </wire>
     <wire>
+      <p1 x="-340" y="420"/>
+      <p2 x="-120" y="420"/>
+    </wire>
+    <wire>
       <p1 x="-2120" y="-680"/>
       <p2 x="-700" y="-680"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="-40"/>
+      <p2 x="-1000" y="-40"/>
     </wire>
     <wire>
       <p1 x="-240" y="40"/>
@@ -2163,6 +2473,10 @@ end Behavioral;</string>
       <p2 x="1500" y="180"/>
     </wire>
     <wire>
+      <p1 x="-1900" y="-440"/>
+      <p2 x="-1860" y="-440"/>
+    </wire>
+    <wire>
       <p1 x="-1080" y="-440"/>
       <p2 x="-940" y="-440"/>
     </wire>
@@ -2173,6 +2487,10 @@ end Behavioral;</string>
     <wire>
       <p1 x="300" y="440"/>
       <p2 x="620" y="440"/>
+    </wire>
+    <wire>
+      <p1 x="-2280" y="440"/>
+      <p2 x="-1720" y="440"/>
     </wire>
     <wire>
       <p1 x="-720" y="-60"/>
@@ -2231,12 +2549,12 @@ end Behavioral;</string>
       <p2 x="520" y="320"/>
     </wire>
     <wire>
-      <p1 x="-1740" y="320"/>
-      <p2 x="-1700" y="320"/>
-    </wire>
-    <wire>
       <p1 x="-2220" y="320"/>
       <p2 x="-1920" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="-1560" y="320"/>
+      <p2 x="-1540" y="320"/>
     </wire>
     <wire>
       <p1 x="-960" y="-580"/>
@@ -2311,12 +2629,20 @@ end Behavioral;</string>
       <p2 x="-620" y="460"/>
     </wire>
     <wire>
+      <p1 x="-1740" y="460"/>
+      <p2 x="-1640" y="460"/>
+    </wire>
+    <wire>
       <p1 x="-720" y="-80"/>
       <p2 x="-640" y="-80"/>
     </wire>
     <wire>
       <p1 x="-1580" y="-80"/>
       <p2 x="-1500" y="-80"/>
+    </wire>
+    <wire>
+      <p1 x="-2280" y="-720"/>
+      <p2 x="-560" y="-720"/>
     </wire>
     <wire>
       <p1 x="-700" y="80"/>
@@ -2355,8 +2681,8 @@ end Behavioral;</string>
       <p2 x="-1520" y="340"/>
     </wire>
     <wire>
-      <p1 x="-2120" y="340"/>
-      <p2 x="-1920" y="340"/>
+      <p1 x="-1740" y="340"/>
+      <p2 x="-1700" y="340"/>
     </wire>
     <wire>
       <p1 x="-980" y="-600"/>
@@ -2416,6 +2742,10 @@ end Behavioral;</string>
     </wire>
     <wire>
       <p1 x="1740" y="220"/>
+      <p2 x="1780" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="1780" y="220"/>
       <p2 x="1900" y="220"/>
     </wire>
     <wire>
@@ -2471,6 +2801,10 @@ end Behavioral;</string>
       <p2 x="520" y="100"/>
     </wire>
     <wire>
+      <p1 x="980" y="100"/>
+      <p2 x="1000" y="100"/>
+    </wire>
+    <wire>
       <p1 x="-880" y="740"/>
       <p2 x="540" y="740"/>
     </wire>
@@ -2491,8 +2825,20 @@ end Behavioral;</string>
       <p2 x="-1440" y="360"/>
     </wire>
     <wire>
-      <p1 x="-2180" y="360"/>
+      <p1 x="-120" y="360"/>
+      <p2 x="-100" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="-2120" y="360"/>
       <p2 x="-1920" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="-1720" y="360"/>
+      <p2 x="-1700" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="-1440" y="360"/>
+      <p2 x="-1340" y="360"/>
     </wire>
     <wire>
       <p1 x="-2160" y="-620"/>
@@ -2571,6 +2917,10 @@ end Behavioral;</string>
       <p2 x="1500" y="240"/>
     </wire>
     <wire>
+      <p1 x="2520" y="240"/>
+      <p2 x="2580" y="240"/>
+    </wire>
+    <wire>
       <p1 x="-580" y="240"/>
       <p2 x="-560" y="240"/>
     </wire>
@@ -2599,6 +2949,10 @@ end Behavioral;</string>
       <p2 x="-600" y="-120"/>
     </wire>
     <wire>
+      <p1 x="-600" y="-120"/>
+      <p2 x="-220" y="-120"/>
+    </wire>
+    <wire>
       <p1 x="-900" y="760"/>
       <p2 x="520" y="760"/>
     </wire>
@@ -2623,8 +2977,20 @@ end Behavioral;</string>
       <p2 x="-1020" y="-380"/>
     </wire>
     <wire>
+      <p1 x="-1900" y="-380"/>
+      <p2 x="-1860" y="-380"/>
+    </wire>
+    <wire>
       <p1 x="-1020" y="-380"/>
       <p2 x="-700" y="-380"/>
+    </wire>
+    <wire>
+      <p1 x="-1540" y="380"/>
+      <p2 x="-1520" y="380"/>
+    </wire>
+    <wire>
+      <p1 x="-2180" y="380"/>
+      <p2 x="-1920" y="380"/>
     </wire>
     <wire>
       <p1 x="-2180" y="-640"/>
@@ -2644,10 +3010,14 @@ end Behavioral;</string>
     </wire>
     <wire>
       <p1 x="-1540" y="220"/>
-      <p2 x="-1540" y="280"/>
+      <p2 x="-1540" y="300"/>
     </wire>
     <wire>
-      <p1 x="-1540" y="300"/>
+      <p1 x="-1540" y="380"/>
+      <p2 x="-1540" y="420"/>
+    </wire>
+    <wire>
+      <p1 x="-1540" y="320"/>
       <p2 x="-1540" y="340"/>
     </wire>
     <wire>
@@ -2660,7 +3030,7 @@ end Behavioral;</string>
     </wire>
     <wire>
       <p1 x="-2180" y="-240"/>
-      <p2 x="-2180" y="360"/>
+      <p2 x="-2180" y="380"/>
     </wire>
     <wire>
       <p1 x="260" y="40"/>
@@ -2787,6 +3157,10 @@ end Behavioral;</string>
       <p2 x="300" y="440"/>
     </wire>
     <wire>
+      <p1 x="-560" y="-720"/>
+      <p2 x="-560" y="-480"/>
+    </wire>
+    <wire>
       <p1 x="-560" y="-480"/>
       <p2 x="-560" y="40"/>
     </wire>
@@ -2813,6 +3187,10 @@ end Behavioral;</string>
     <wire>
       <p1 x="-440" y="-280"/>
       <p2 x="-440" y="-240"/>
+    </wire>
+    <wire>
+      <p1 x="-1720" y="360"/>
+      <p2 x="-1720" y="440"/>
     </wire>
     <wire>
       <p1 x="440" y="-20"/>
@@ -2892,7 +3270,7 @@ end Behavioral;</string>
     </wire>
     <wire>
       <p1 x="-2120" y="-680"/>
-      <p2 x="-2120" y="340"/>
+      <p2 x="-2120" y="360"/>
     </wire>
     <wire>
       <p1 x="-1480" y="-220"/>
@@ -2905,6 +3283,10 @@ end Behavioral;</string>
     <wire>
       <p1 x="-1740" y="160"/>
       <p2 x="-1740" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-1740" y="340"/>
+      <p2 x="-1740" y="460"/>
     </wire>
     <wire>
       <p1 x="-1100" y="-460"/>
@@ -2952,6 +3334,10 @@ end Behavioral;</string>
     </wire>
     <wire>
       <p1 x="980" y="-700"/>
+      <p2 x="980" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="980" y="100"/>
       <p2 x="980" y="220"/>
     </wire>
     <wire>
@@ -2972,6 +3358,10 @@ end Behavioral;</string>
     </wire>
     <wire>
       <p1 x="2520" y="220"/>
+      <p2 x="2520" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="2520" y="240"/>
       <p2 x="2520" y="800"/>
     </wire>
     <wire>
@@ -2981,6 +3371,10 @@ end Behavioral;</string>
     <wire>
       <p1 x="-220" y="140"/>
       <p2 x="-220" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="-220" y="-140"/>
+      <p2 x="-220" y="-120"/>
     </wire>
     <wire>
       <p1 x="-1500" y="-80"/>
@@ -3025,6 +3419,10 @@ end Behavioral;</string>
     <wire>
       <p1 x="-360" y="-260"/>
       <p2 x="-360" y="-240"/>
+    </wire>
+    <wire>
+      <p1 x="-2280" y="-720"/>
+      <p2 x="-2280" y="440"/>
     </wire>
     <wire>
       <p1 x="1000" y="260"/>
@@ -3083,6 +3481,14 @@ end Behavioral;</string>
       <p2 x="500" y="500"/>
     </wire>
     <wire>
+      <p1 x="1780" y="220"/>
+      <p2 x="1780" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="-120" y="360"/>
+      <p2 x="-120" y="420"/>
+    </wire>
+    <wire>
       <p1 x="1400" y="260"/>
       <p2 x="1400" y="620"/>
     </wire>
@@ -3100,11 +3506,15 @@ end Behavioral;</string>
     </wire>
     <wire>
       <p1 x="-1020" y="-180"/>
-      <p2 x="-1020" y="160"/>
+      <p2 x="-1020" y="-40"/>
     </wire>
     <wire>
       <p1 x="-1020" y="320"/>
       <p2 x="-1020" y="560"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="-40"/>
+      <p2 x="-1020" y="160"/>
     </wire>
     <wire>
       <p1 x="1020" y="280"/>
