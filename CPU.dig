@@ -173,7 +173,7 @@ begin
 
 opcode &lt;= Instruction(6 downto 0);
 
-process(opcode)
+process(Instruction,opcode)
 begin
     case opcode is
 
@@ -382,6 +382,7 @@ begin
 		rs1_out &lt;= (others =&gt; &apos;0&apos;);
 		rs2_out &lt;= (others =&gt; &apos;0&apos;);
 		rd_out &lt;= (others =&gt; &apos;0&apos;);
+		PC_out &lt;= (others =&gt; &apos;0&apos;);
 		MemRead &lt;= &apos;0&apos;;
 		rs1_data_out &lt;= (others =&gt; &apos;0&apos;);
 		rs2_data_out &lt;= (others =&gt; &apos;0&apos;);
@@ -397,6 +398,7 @@ begin
 		rs1_out &lt;= rs1_in;
 		rs2_out &lt;= rs2_in;
 		rd_out &lt;= rd_in;
+		PC_out &lt;= PC_in;
 		MemRead &lt;= MEMSignals_in(0);
 		rs1_data_out &lt;= rs1_data_in;
 		rs2_data_out &lt;= rs2_data_in;
@@ -759,7 +761,7 @@ end Behavorial;</string>
         </entry>
         <entry>
           <string>externalInputs</string>
-          <string>PCplus1:32,ID_result:32,EX_result:32,S1,S2,clk</string>
+          <string>PCplus1:32,ID_result:32,EX_result:32,S1,S2</string>
         </entry>
         <entry>
           <string>Code</string>
@@ -768,29 +770,26 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity PCSrc is
     Port (
-        PCplus1 	: in  std_logic_vector(31 downto 0); -- Entrada de dados 0
-        ID_result  	: in  std_logic_vector(31 downto 0); -- Entrada de dados 1
-        EX_result	: in  std_logic_vector(31 downto 0); -- Entrada de dados 2
-        S1 		: in  std_logic; -- Linha de seleção
-        S2 		: in  std_logic; -- Linha de seleção
-        NextPC 		: out std_logic_vector(31 downto 0);  -- Saída de dados
-        clk		: in  STD_LOGIC
+        PCplus1  : in  std_logic_vector(31 downto 0);
+        ID_result: in  std_logic_vector(31 downto 0);
+        EX_result: in  std_logic_vector(31 downto 0);
+        S1       : in  std_logic;
+        S2       : in  std_logic;
+        NextPC   : out std_logic_vector(31 downto 0)
     );
 end PCSrc;
 
 architecture Behavorial of PCSrc is
-signal SEL : std_logic_vector(1 downto 0);
+    signal SEL : std_logic_vector(1 downto 0);
 begin
-SEL &lt;= S1&amp;S2;
-    process(PCplus1, ID_result, EX_result, S1, S2, clk)
-    begin
-        case SEL is
-            when &quot;00&quot;   =&gt; NextPC &lt;= PCplus1;
-            when &quot;01&quot;   =&gt; NextPC &lt;= ID_result;
-            when &quot;10&quot;   =&gt; NextPC &lt;= EX_result;
-            when others =&gt; NextPC &lt;= (others =&gt; &apos;0&apos;); -- valores incorretos
-        end case;
-    end process;
+
+    SEL &lt;= S1 &amp; S2;
+
+    with SEL select
+        NextPC &lt;= PCplus1   when &quot;00&quot;,
+                  ID_result when &quot;01&quot;,
+                  EX_result when &quot;10&quot;,
+                  (others =&gt; &apos;0&apos;) when others;
 
 end Behavorial;</string>
         </entry>
@@ -800,7 +799,7 @@ end Behavorial;</string>
         </entry>
         <entry>
           <string>Width</string>
-          <int>9</int>
+          <int>8</int>
         </entry>
       </elementAttributes>
       <pos x="-1920" y="280"/>
@@ -945,8 +944,8 @@ entity Control is
         JALR_2ndCycle : in  std_logic;
         Instr         : in  std_logic_vector(31 downto 0);
 
-        JAL           : out std_logic;
         JALR          : out std_logic;
+        JAL           : out std_logic;
         BranchEQ      : out std_logic;
         BranchNEQ     : out std_logic;
         EXSignals     : out std_logic_vector(4 downto 0);
@@ -1055,7 +1054,7 @@ end Behavioral;</string>
         </entry>
         <entry>
           <string>externalOutputs</string>
-          <string>JAL,JALR,BranchEQ,BranchNEQ,EXSignals:5,MEMSignals:2,WBSignals:2,ImmSrc</string>
+          <string>JALR,JAL,BranchEQ,BranchNEQ,EXSignals:5,MEMSignals:2,WBSignals:2,ImmSrc</string>
         </entry>
         <entry>
           <string>Width</string>
@@ -1267,13 +1266,9 @@ begin
     process(ALUctl, A, B)
         variable A_int : signed(31 downto 0);
         variable B_int : signed(31 downto 0);
-        variable B_unsigned : unsigned(31 downto 0);
-        variable shift_amt  : integer;
     begin
         A_int := signed(A);
         B_int := signed(B);
-        B_unsigned := unsigned(B);
-        shift_amt := to_integer(B_unsigned);  -- uso direto de B como deslocamento
 
         case ALUctl is
             when &quot;0000&quot; =&gt; -- AND
@@ -1289,10 +1284,10 @@ begin
                 result &lt;= std_logic_vector(A_int - B_int);
 
             when &quot;1000&quot; =&gt; -- SLL (Shift Left Logical)
-                result &lt;= std_logic_vector(shift_left(unsigned(A), shift_amt));
+                result &lt;= std_logic_vector(shift_left(unsigned(A), to_integer(unsigned(B(4 downto 0)))));
 
             when &quot;1001&quot; =&gt; -- SRL (Shift Right Logical)
-                result &lt;= std_logic_vector(shift_right(unsigned(A), shift_amt));
+                result &lt;= std_logic_vector(shift_right(unsigned(A), to_integer(unsigned(B(4 downto 0)))));
 
             when &quot;1100&quot; =&gt; -- XOR
                 result &lt;= A xor B;
@@ -1353,8 +1348,8 @@ begin
     begin
         case SEL is
             when &quot;00&quot;   =&gt; A &lt;= ID_EX;
-            when &quot;01&quot;   =&gt; A &lt;= EX_MEM;
-            when &quot;10&quot;   =&gt; A &lt;= MEM_WB;
+            when &quot;10&quot;   =&gt; A &lt;= EX_MEM;
+            when &quot;01&quot;   =&gt; A &lt;= MEM_WB;
             when others =&gt; A &lt;= (others =&gt; &apos;0&apos;); -- casos invalidos
         end case;
     end process;
@@ -1408,8 +1403,8 @@ begin
     begin
         case SEL is
             when &quot;00&quot;   =&gt; B &lt;= ID_EX;
-            when &quot;01&quot;   =&gt; B &lt;= EX_MEM;
-            when &quot;10&quot;   =&gt; B &lt;= MEM_WB;
+            when &quot;10&quot;   =&gt; B &lt;= EX_MEM;
+            when &quot;01&quot;   =&gt; B &lt;= MEM_WB;
             when others =&gt; B &lt;= (others =&gt; &apos;0&apos;); -- casos invalidos
         end case;
     end process;
@@ -1750,7 +1745,10 @@ end Behavioral;</string>
         </entry>
         <entry>
           <string>Data</string>
-          <data>0,800093,7*0,100563</data>
+          <data>0,800093,40e113,417193,a14213,209293,100563,20d313,1020a3,3103b3
+,417433,4164b3,414533,401105b3,619633,819563,62d6b3,102703,818363
+,5*100993,311363,5*100993,1797,2837,6008ef,5*100993,c28967,5*100993
+,ffc08a13,a2a83</data>
         </entry>
       </elementAttributes>
       <pos x="-1520" y="340"/>
@@ -2141,18 +2139,34 @@ end Behavioral;</string>
       <pos x="-1000" y="-40"/>
     </visualElement>
     <visualElement>
-      <elementName>Tunnel</elementName>
+      <elementName>Out</elementName>
       <elementAttributes>
         <entry>
-          <string>rotation</string>
-          <rotation rotation="2"/>
-        </entry>
-        <entry>
-          <string>NetName</string>
-          <string>CLK</string>
+          <string>Bits</string>
+          <int>5</int>
         </entry>
       </elementAttributes>
-      <pos x="-1920" y="400"/>
+      <pos x="2300" y="660"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="660" y="20"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="800" y="60"/>
     </visualElement>
   </visualElements>
   <wires>
@@ -2213,6 +2227,10 @@ end Behavioral;</string>
       <p2 x="-400" y="260"/>
     </wire>
     <wire>
+      <p1 x="660" y="260"/>
+      <p2 x="980" y="260"/>
+    </wire>
+    <wire>
       <p1 x="-960" y="-520"/>
       <p2 x="-940" y="-520"/>
     </wire>
@@ -2265,6 +2283,14 @@ end Behavioral;</string>
       <p2 x="1000" y="660"/>
     </wire>
     <wire>
+      <p1 x="2240" y="660"/>
+      <p2 x="2300" y="660"/>
+    </wire>
+    <wire>
+      <p1 x="640" y="20"/>
+      <p2 x="660" y="20"/>
+    </wire>
+    <wire>
       <p1 x="1880" y="280"/>
       <p2 x="1900" y="280"/>
     </wire>
@@ -2286,7 +2312,7 @@ end Behavioral;</string>
     </wire>
     <wire>
       <p1 x="620" y="280"/>
-      <p2 x="680" y="280"/>
+      <p2 x="660" y="280"/>
     </wire>
     <wire>
       <p1 x="1020" y="280"/>
@@ -2299,6 +2325,10 @@ end Behavioral;</string>
     <wire>
       <p1 x="200" y="280"/>
       <p2 x="280" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="660" y="280"/>
+      <p2 x="680" y="280"/>
     </wire>
     <wire>
       <p1 x="-1000" y="540"/>
@@ -2421,10 +2451,6 @@ end Behavioral;</string>
       <p2 x="-1540" y="300"/>
     </wire>
     <wire>
-      <p1 x="780" y="300"/>
-      <p2 x="980" y="300"/>
-    </wire>
-    <wire>
       <p1 x="-1020" y="560"/>
       <p2 x="-200" y="560"/>
     </wire>
@@ -2517,6 +2543,10 @@ end Behavioral;</string>
       <p2 x="520" y="60"/>
     </wire>
     <wire>
+      <p1 x="780" y="60"/>
+      <p2 x="800" y="60"/>
+    </wire>
+    <wire>
       <p1 x="200" y="700"/>
       <p2 x="1040" y="700"/>
     </wire>
@@ -2555,6 +2585,10 @@ end Behavioral;</string>
     <wire>
       <p1 x="-1560" y="320"/>
       <p2 x="-1540" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="-1760" y="320"/>
+      <p2 x="-1740" y="320"/>
     </wire>
     <wire>
       <p1 x="-960" y="-580"/>
@@ -2658,6 +2692,10 @@ end Behavioral;</string>
     </wire>
     <wire>
       <p1 x="620" y="80"/>
+      <p2 x="640" y="80"/>
+    </wire>
+    <wire>
+      <p1 x="640" y="80"/>
       <p2 x="680" y="80"/>
     </wire>
     <wire>
@@ -2683,6 +2721,10 @@ end Behavioral;</string>
     <wire>
       <p1 x="-1740" y="340"/>
       <p2 x="-1700" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="-2120" y="340"/>
+      <p2 x="-1920" y="340"/>
     </wire>
     <wire>
       <p1 x="-980" y="-600"/>
@@ -2829,12 +2871,12 @@ end Behavioral;</string>
       <p2 x="-100" y="360"/>
     </wire>
     <wire>
-      <p1 x="-2120" y="360"/>
-      <p2 x="-1920" y="360"/>
-    </wire>
-    <wire>
       <p1 x="-1720" y="360"/>
       <p2 x="-1700" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="-2180" y="360"/>
+      <p2 x="-1920" y="360"/>
     </wire>
     <wire>
       <p1 x="-1440" y="360"/>
@@ -2989,10 +3031,6 @@ end Behavioral;</string>
       <p2 x="-1520" y="380"/>
     </wire>
     <wire>
-      <p1 x="-2180" y="380"/>
-      <p2 x="-1920" y="380"/>
-    </wire>
-    <wire>
       <p1 x="-2180" y="-640"/>
       <p2 x="-340" y="-640"/>
     </wire>
@@ -3003,6 +3041,10 @@ end Behavioral;</string>
     <wire>
       <p1 x="640" y="100"/>
       <p2 x="640" y="140"/>
+    </wire>
+    <wire>
+      <p1 x="640" y="20"/>
+      <p2 x="640" y="80"/>
     </wire>
     <wire>
       <p1 x="-900" y="280"/>
@@ -3030,7 +3072,7 @@ end Behavioral;</string>
     </wire>
     <wire>
       <p1 x="-2180" y="-240"/>
-      <p2 x="-2180" y="380"/>
+      <p2 x="-2180" y="360"/>
     </wire>
     <wire>
       <p1 x="260" y="40"/>
@@ -3055,6 +3097,10 @@ end Behavioral;</string>
     <wire>
       <p1 x="780" y="240"/>
       <p2 x="780" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="780" y="60"/>
+      <p2 x="780" y="100"/>
     </wire>
     <wire>
       <p1 x="780" y="100"/>
@@ -3091,6 +3137,10 @@ end Behavioral;</string>
     <wire>
       <p1 x="660" y="320"/>
       <p2 x="660" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="660" y="260"/>
+      <p2 x="660" y="280"/>
     </wire>
     <wire>
       <p1 x="-1560" y="100"/>
@@ -3234,6 +3284,10 @@ end Behavioral;</string>
     </wire>
     <wire>
       <p1 x="2240" y="180"/>
+      <p2 x="2240" y="660"/>
+    </wire>
+    <wire>
+      <p1 x="2240" y="660"/>
       <p2 x="2240" y="760"/>
     </wire>
     <wire>
@@ -3269,12 +3323,12 @@ end Behavioral;</string>
       <p2 x="-200" y="180"/>
     </wire>
     <wire>
-      <p1 x="-2120" y="-680"/>
-      <p2 x="-2120" y="360"/>
-    </wire>
-    <wire>
       <p1 x="-1480" y="-220"/>
       <p2 x="-1480" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="-2120" y="-680"/>
+      <p2 x="-2120" y="340"/>
     </wire>
     <wire>
       <p1 x="200" y="380"/>
@@ -3283,6 +3337,10 @@ end Behavioral;</string>
     <wire>
       <p1 x="-1740" y="160"/>
       <p2 x="-1740" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-1740" y="320"/>
+      <p2 x="-1740" y="340"/>
     </wire>
     <wire>
       <p1 x="-1740" y="340"/>
@@ -3329,12 +3387,12 @@ end Behavioral;</string>
       <p2 x="-340" y="-360"/>
     </wire>
     <wire>
-      <p1 x="980" y="240"/>
-      <p2 x="980" y="300"/>
-    </wire>
-    <wire>
       <p1 x="980" y="-700"/>
       <p2 x="980" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="980" y="240"/>
+      <p2 x="980" y="260"/>
     </wire>
     <wire>
       <p1 x="980" y="100"/>
