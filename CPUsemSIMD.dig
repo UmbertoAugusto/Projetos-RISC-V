@@ -1,0 +1,3587 @@
+<?xml version="1.0" encoding="utf-8"?>
+<circuit>
+  <version>2</version>
+  <attributes/>
+  <visualElements>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>PCPlusOne</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>PC:32</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity PCPlusOne is
+    Port (
+        PC        : in  STD_LOGIC_VECTOR(31 downto 0);
+        Next_PC   : out  STD_LOGIC_VECTOR(31 downto 0)
+    );
+end PCPlusOne;
+
+architecture Behavioral of PCPlusOne is
+begin
+	Next_PC &lt;= std_logic_vector(unsigned(PC) + 1);
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>Next_PC:32</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>7</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-1720" y="160"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>PCPlusImm</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>PC:32,IMM:32</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity PCPlusImm is
+    Port (
+        PC        : in  STD_LOGIC_VECTOR(31 downto 0);
+	IMM	  : in  STD_LOGIC_VECTOR(31 downto 0);
+        Next_PC   : out  STD_LOGIC_VECTOR(31 downto 0)
+    );
+end PCPlusImm;
+
+architecture Behavioral of PCPlusImm is
+begin
+	Next_PC &lt;= std_logic_vector(unsigned(PC) + unsigned(IMM));
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>Next_PC:32</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>7</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-840" y="60"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>CheckEqual</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>Rs1:32,Rs2:32</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity CheckEqual is
+    Port (
+        Rs1        : in  STD_LOGIC_VECTOR(31 downto 0);
+	Rs2	  : in  STD_LOGIC_VECTOR(31 downto 0);
+        IsEqual   : out  STD_LOGIC
+    );
+end CheckEqual;
+
+architecture Behavioral of CheckEqual is
+begin
+	IsEqual &lt;= &apos;1&apos; when Rs1 = Rs2 else &apos;0&apos;;
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>IsEqual</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>5</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-560" y="240"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>ImmGen</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>Instruction:32</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity ImmGen is
+    Port (
+        Instruction	: in  STD_LOGIC_VECTOR(31 downto 0);
+        Immediate   	: out  STD_LOGIC_VECTOR(31 downto 0)
+    );
+end ImmGen;
+
+architecture Behavioral of ImmGen is
+
+signal opcode : STD_LOGIC_VECTOR(6 downto 0);
+
+begin
+
+opcode &lt;= Instruction(6 downto 0);
+
+process(Instruction,opcode)
+begin
+    case opcode is
+
+        when &quot;0110011&quot; =&gt;
+		-- R type
+		Immediate &lt;= (others =&gt; &apos;0&apos;);
+
+        when &quot;0010011&quot; | &quot;1100111&quot; | &quot;0000011&quot; =&gt;
+		-- I type
+		Immediate(31 downto 12) &lt;= (others =&gt; Instruction (31)); --bit de sinal
+		Immediate (11 downto 0) &lt;= Instruction (31 downto 20);
+
+        when &quot;0010111&quot; | &quot;0110111&quot; =&gt; 
+            	-- U type
+            	Immediate (11 downto 0) &lt;= (others =&gt; &apos;0&apos;);
+		Immediate (31 downto 12) &lt;= Instruction (31 downto 12);
+
+        when &quot;1100011&quot; =&gt; 
+            	-- SB type
+		Immediate (31 downto 12) &lt;= (others =&gt; Instruction (31)); --bit de sinal
+		Immediate (0) &lt;= &apos;0&apos;;
+		Immediate (11) &lt;= Instruction (7);
+		Immediate (4 downto 1) &lt;= Instruction (11 downto 8);
+		Immediate (10 downto 5) &lt;= Instruction (30 downto 25);
+
+        when &quot;1101111&quot; =&gt; 
+            	-- UJ type
+		Immediate (31 downto 20) &lt;= (others =&gt; Instruction (31));
+		Immediate (0) &lt;= &apos;0&apos;;
+		Immediate (11) &lt;= Instruction (20);
+		Immediate (19 downto 12) &lt;= Instruction (19 downto 12);
+		Immediate (10 downto 1) &lt;= Instruction (30 downto 21);
+            	
+        when &quot;0100011&quot; =&gt; 
+           	 -- S type
+            	Immediate (31 downto 12) &lt;= (others =&gt; Instruction (31));
+		Immediate (11 downto 5) &lt;= Instruction (31 downto 25);
+		Immediate (4 downto 0) &lt;= Instruction (11 downto 7);
+
+        when others =&gt;
+            	Immediate &lt;= (others =&gt; &apos;0&apos;);
+
+    end case;
+end process;
+
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>Immediate:32</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>11</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-860" y="500"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>IF_ID</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>rst,clk,IF_ID_WRITE,IF_ID_flush,PC_in:32,inst_in:32</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity IF_ID is
+    Port ( 
+	rst     	: in  STD_LOGIC; 
+        clk		: in  STD_LOGIC;
+
+	IF_ID_WRITE	: in STD_LOGIC;
+	IF_ID_flush	: in STD_LOGIC;
+        PC_in		: in  STD_LOGIC_VECTOR(31 downto 0);
+        inst_in		: in  STD_LOGIC_VECTOR(31 downto 0);
+
+	PC_out		: out STD_LOGIC_VECTOR(31 downto 0);
+	inst_out	: out STD_LOGIC_VECTOR(31 downto 0);
+	rd		: out STD_LOGIC_VECTOR(4 downto 0);
+        rs1		: out STD_LOGIC_VECTOR(4 downto 0);
+        rs2		: out STD_LOGIC_VECTOR(4 downto 0);
+	func3		: out STD_LOGIC_VECTOR(2 downto 0);
+	func7		: out STD_LOGIC_VECTOR(6 downto 0)
+
+    );
+end IF_ID;
+
+architecture Behavioral of IF_ID is
+
+signal s_dado : STD_LOGIC_VECTOR(31 downto 0);
+
+begin
+
+process(clk,rst)
+begin
+	if rst = &apos;1&apos; then
+		s_dado &lt;= (others =&gt; &apos;0&apos;);
+        elsif rising_edge(clk) and IF_ID_WRITE=&apos;0&apos; then
+		if IF_ID_flush=&apos;1&apos; then
+			PC_out &lt;= (others =&gt; &apos;0&apos;);
+			inst_out &lt;= (others =&gt; &apos;0&apos;);
+		else
+			PC_out &lt;= PC_in;
+            		inst_out &lt;= inst_in;
+		end if;
+	end if;
+end process;
+
+rs1 &lt;= inst_out(19 downto 15);
+rs2 &lt;= inst_out(24 downto 20);
+rd &lt;= inst_out(11 downto 7);
+func3 &lt;= inst_out(14 downto 12);
+func7 &lt;= inst_out(31 downto 25);
+
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>PC_out:32,inst_out:32,rd:5,rs1:5,rs2:5,func3:3,func7:7</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>15</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-1420" y="140"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>ID_EX</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>rst,clk,EXSignals_in:5,MEMSignals_in:2,WBSignals_in:2,PC_in:32,rs1_data_in:32,rs2_data_in:32,rd_in:5,rs1_in:5,rs2_in:5,func3_in:3,func7_in:7,immediate_in:32</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity ID_EX is
+    Port ( 
+	rst     	: in  STD_LOGIC; 
+        clk		: in  STD_LOGIC;
+
+        EXSignals_in	: in  STD_LOGIC_VECTOR(4 downto 0);
+        MEMSignals_in	: in  STD_LOGIC_VECTOR(1 downto 0);
+        WBSignals_in	: in  STD_LOGIC_VECTOR(1 downto 0);
+
+	PC_in		: in STD_LOGIC_VECTOR(31 downto 0);
+        rs1_data_in	: in  STD_LOGIC_VECTOR(31 downto 0);
+        rs2_data_in	: in  STD_LOGIC_VECTOR(31 downto 0);
+        rd_in		: in  STD_LOGIC_VECTOR(4 downto 0);
+        rs1_in		: in  STD_LOGIC_VECTOR(4 downto 0);
+        rs2_in		: in  STD_LOGIC_VECTOR(4 downto 0);
+	func3_in	: in STD_LOGIC_VECTOR(2 downto 0);
+	func7_in	: in STD_LOGIC_VECTOR(6 downto 0);
+        immediate_in	: in  STD_LOGIC_VECTOR(31 downto 0);
+
+        rs1_data_out	: out STD_LOGIC_VECTOR(31 downto 0);
+        rs2_data_out	: out STD_LOGIC_VECTOR(31 downto 0);
+	PC_out		: out STD_LOGIC_VECTOR(31 downto 0);
+	immediate_out	: out STD_LOGIC_VECTOR(31 downto 0);
+	ALUSrcA		: out STD_LOGIC_VECTOR(1 downto 0);
+	ALUSrcB		: out STD_LOGIC;
+	func3_out	: out STD_LOGIC_VECTOR(2 downto 0);
+	func7_out	: out STD_LOGIC_VECTOR(6 downto 0);
+	ALUOp		: out STD_LOGIC_VECTOR(1 downto 0);
+	rs1_out		: out STD_LOGIC_VECTOR(4 downto 0);
+	rs2_out		: out STD_LOGIC_VECTOR(4 downto 0);
+	MemRead		: out STD_LOGIC;
+	rd_out		: out STD_LOGIC_VECTOR(4 downto 0);
+	MEMSignals_out	: out STD_LOGIC_VECTOR(1 downto 0);
+	WBSignals_out	: out STD_LOGIC_VECTOR(1 downto 0)
+    );
+end ID_EX;
+
+architecture Behavioral of ID_EX is
+
+signal s_dado : STD_LOGIC_VECTOR(31 downto 0);
+
+begin
+
+process(clk,rst)
+begin
+	if rst = &apos;1&apos; then
+		rs1_out &lt;= (others =&gt; &apos;0&apos;);
+		rs2_out &lt;= (others =&gt; &apos;0&apos;);
+		rd_out &lt;= (others =&gt; &apos;0&apos;);
+		PC_out &lt;= (others =&gt; &apos;0&apos;);
+		MemRead &lt;= &apos;0&apos;;
+		rs1_data_out &lt;= (others =&gt; &apos;0&apos;);
+		rs2_data_out &lt;= (others =&gt; &apos;0&apos;);
+		func3_out &lt;= (others =&gt; &apos;0&apos;);
+		func7_out &lt;= (others =&gt; &apos;0&apos;);
+		immediate_out &lt;= (others =&gt; &apos;0&apos;);
+		ALUSrcA &lt;= (others =&gt; &apos;0&apos;);
+		ALUSrcB &lt;= &apos;0&apos;;
+		ALUOp &lt;= (others =&gt; &apos;0&apos;);
+		MEMSignals_out &lt;= (others =&gt; &apos;0&apos;);
+		WBSignals_out &lt;= (others =&gt; &apos;0&apos;);
+        elsif rising_edge(clk) then
+		rs1_out &lt;= rs1_in;
+		rs2_out &lt;= rs2_in;
+		rd_out &lt;= rd_in;
+		PC_out &lt;= PC_in;
+		MemRead &lt;= MEMSignals_in(0);
+		rs1_data_out &lt;= rs1_data_in;
+		rs2_data_out &lt;= rs2_data_in;
+		func3_out &lt;= func3_in;
+		func7_out &lt;= func7_in;
+		immediate_out &lt;= immediate_in;
+		ALUSrcA &lt;= EXSignals_in(1 downto 0);
+		ALUSrcB &lt;= EXSignals_in(2);
+		ALUOp &lt;= EXSignals_in(4 downto 3);
+		MEMSignals_out &lt;= MEMSignals_in;
+		WBSignals_out &lt;= WBSignals_in;
+	end if;
+end process;
+
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>rs1_data_out:32,rs2_data_out:32,PC_out:32,immediate_out:32,ALUSrcA:2,ALUSrcB,func3_out:3,func7_out:7,ALUOp:2,rs1_out:5,rs2_out:5,MemRead,rd_out:5,MEMSignals_out:2,WBSignals_out:2</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>15</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-100" y="100"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>EX_MEM</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>rst,clk,ALUoutput_in:32,rs2_data_in:32,rd_in:5,MEMSignals_in:2,WBSignals_in:2</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity EX_MEM is
+    Port ( 
+	rst     	: in  STD_LOGIC; 
+        clk		: in  STD_LOGIC;
+
+	ALUoutput_in	: in  STD_LOGIC_VECTOR(31 downto 0);
+	rs2_data_in	: in  STD_LOGIC_VECTOR(31 downto 0); --for store instruction
+        rd_in		: in  STD_LOGIC_VECTOR(4 downto 0);
+
+	MEMSignals_in	: in STD_LOGIC_VECTOR(1 downto 0);
+	WBSignals_in	: in STD_LOGIC_VECTOR(1 downto 0);
+
+	ALUoutput_out	: out  STD_LOGIC_VECTOR(31 downto 0);
+        rs2_data_out	: out STD_LOGIC_VECTOR(31 downto 0);
+	MemRead		: out STD_LOGIC;
+	MemWrite	: out STD_LOGIC;
+	rd_out		: out STD_LOGIC_VECTOR(4 downto 0);
+	WBSignals_out	: out STD_LOGIC_VECTOR(1 downto 0);
+	RegWrite_out	: out STD_LOGIC
+    );
+end EX_MEM;
+
+architecture Behavioral of EX_MEM is
+
+signal s_dado : STD_LOGIC_VECTOR(31 downto 0);
+
+begin
+
+process(clk,rst)
+begin
+	if rst = &apos;1&apos; then
+		rd_out &lt;= (others =&gt; &apos;0&apos;);
+		rs2_data_out &lt;= (others =&gt; &apos;0&apos;);
+		ALUoutput_out &lt;= (others =&gt; &apos;0&apos;);
+		MemRead &lt;= &apos;0&apos;;
+		MemWrite &lt;= &apos;0&apos;;
+		WBSignals_out &lt;= (others =&gt; &apos;0&apos;);
+		RegWrite_out &lt;= &apos;0&apos;;
+        elsif rising_edge(clk) then
+		rd_out &lt;= rd_in;
+		rs2_data_out &lt;= rs2_data_in;
+		ALUoutput_out &lt;= ALUoutput_in;
+		MemRead &lt;= MEMSignals_in(0);
+		MemWrite &lt;= MEMSignals_in(1);
+		WBSignals_out &lt;= WBSignals_in;
+		RegWrite_out &lt;= WBSignals_in(1);
+	end if;
+end process;
+
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>ALUoutput_out:32,rs2_data_out:32,MemRead,MemWrite,rd_out:5,WBSignals_out:2,RegWrite_out</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>15</int>
+        </entry>
+      </elementAttributes>
+      <pos x="1060" y="180"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>MEM_WB</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>rst,clk,DataFromMem_in:32,ALUoutput_in:32,rd_in:5,WBSignals_in:2</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity MEM_WB is
+    Port ( 
+	rst     	: in  STD_LOGIC; 
+        clk		: in  STD_LOGIC;
+
+        DataFromMem_in	: in  STD_LOGIC_VECTOR(31 downto 0);
+	ALUoutput_in	: in  STD_LOGIC_VECTOR(31 downto 0);
+        rd_in		: in  STD_LOGIC_VECTOR(4 downto 0);
+
+	WBSignals_in	: in STD_LOGIC_VECTOR(1 downto 0);
+
+	rd_out		: out STD_LOGIC_VECTOR(4 downto 0);
+        DataFromMem_out	: out STD_LOGIC_VECTOR(31 downto 0);
+	ALUoutput_out	: out  STD_LOGIC_VECTOR(31 downto 0);
+
+	MemToReg 	: out STD_LOGIC;
+	RegWrite 	: out STD_LOGIC
+    );
+end MEM_WB;
+
+architecture Behavioral of MEM_WB is
+
+signal s_dado : STD_LOGIC_VECTOR(31 downto 0);
+
+begin
+
+process(clk,rst)
+begin
+	if rst = &apos;1&apos; then
+		rd_out &lt;= (others =&gt; &apos;0&apos;);
+		DataFromMem_out &lt;= (others =&gt; &apos;0&apos;);
+		ALUoutput_out &lt;= (others =&gt; &apos;0&apos;);
+		MemToReg &lt;= &apos;0&apos;;
+		RegWrite &lt;= &apos;0&apos;;
+        elsif rising_edge(clk) then
+		rd_out &lt;= rd_in;
+		DataFromMem_out &lt;= DataFromMem_in;
+		ALUoutput_out &lt;= ALUoutput_in;
+		MemToReg &lt;= WBSignals_in(0);
+		RegWrite &lt;= WBSignals_in(1);
+	end if;
+end process;
+
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>rd_out:5,DataFromMem_out:32,ALUoutput_out:32,MemToReg,RegWrite</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>15</int>
+        </entry>
+      </elementAttributes>
+      <pos x="1900" y="180"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>RAM</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>clk,Addr:32,Din:32,Read,Write</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+USE ieee.numeric_std.all;
+
+entity RAM is
+  port (
+	clk: in std_logic;
+	Dout: out std_logic_vector (31 downto 0);
+	Addr: in std_logic_vector (31 downto 0);
+	Din: in std_logic_vector (31 downto 0);
+	Read: in std_logic;
+	Write: in std_logic
+	);
+end RAM;
+
+architecture Behavioral of RAM is
+	type memoryType is array(0 to (2**16)-1) of STD_LOGIC_VECTOR(31 downto 0);
+	signal memory : memoryType;
+	signal A: std_logic_vector (15 downto 0);
+begin
+
+A &lt;= Addr(15 downto 0);
+
+process (clk)
+begin
+	if falling_edge(clk) then
+		if Write=&apos;1&apos; then
+			memory(to_integer(unsigned(A))) &lt;= Din;
+		end if;
+		if Read=&apos;1&apos; then
+			Dout &lt;= memory(to_integer(unsigned(A)));
+		else
+			Dout &lt;= (others =&gt; &apos;0&apos;);
+		end if;
+	end if;
+end process;
+
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>Dout:32</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>11</int>
+        </entry>
+      </elementAttributes>
+      <pos x="1500" y="160"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>ALUSrcA</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>Rs1:32,PC:32,SEL:2</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity ALUSrcA is
+    Port (
+        Rs1  	: in  std_logic_vector(31 downto 0); -- Entrada de dados 0
+        PC  	: in  std_logic_vector(31 downto 0); -- Entrada de dados 1
+        SEL 	: in  std_logic_vector(1 downto 0); -- Linha de seleção de 2 bits
+        A   	: out std_logic_vector(31 downto 0)  -- Saída de dados
+    );
+end ALUSrcA;
+
+architecture Behavorial of ALUSrcA is
+begin
+    process(Rs1, PC, SEL)
+    begin
+        case SEL is
+            when &quot;00&quot;   =&gt; A &lt;= Rs1;
+            when &quot;01&quot;   =&gt; A &lt;= PC;
+            when others =&gt; A &lt;= (others =&gt; &apos;0&apos;); -- &quot;10&quot; e sinais incorretos
+        end case;
+    end process;
+
+end Behavorial;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>A:32</string>
+        </entry>
+      </elementAttributes>
+      <pos x="680" y="80"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>ALUSrcB</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>Rs2:32,imm:32,SEL</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity ALUSrcB is
+    Port (
+        Rs2  	: in  std_logic_vector(31 downto 0); -- Entrada de dados 0
+        imm  	: in  std_logic_vector(31 downto 0); -- Entrada de dados 1
+        SEL 	: in  std_logic; -- Linha de seleção
+        B   	: out std_logic_vector(31 downto 0)  -- Saída de dados
+    );
+end ALUSrcB;
+
+architecture Behavorial of ALUSrcB is
+begin
+    process(Rs2, imm, SEL)
+    begin
+        case SEL is
+            when &apos;0&apos;   =&gt; B &lt;= Rs2;
+            when others =&gt; B &lt;= imm; -- &apos;1&apos;
+        end case;
+    end process;
+
+end Behavorial;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>B:32</string>
+        </entry>
+      </elementAttributes>
+      <pos x="680" y="280"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>PCSrc</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>PCplus1:32,ID_result:32,EX_result:32,S1,S2</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity PCSrc is
+    Port (
+        PCplus1  : in  std_logic_vector(31 downto 0);
+        ID_result: in  std_logic_vector(31 downto 0);
+        EX_result: in  std_logic_vector(31 downto 0);
+        S1       : in  std_logic;
+        S2       : in  std_logic;
+        NextPC   : out std_logic_vector(31 downto 0)
+    );
+end PCSrc;
+
+architecture Behavorial of PCSrc is
+    signal SEL : std_logic_vector(1 downto 0);
+begin
+
+    SEL &lt;= S1 &amp; S2;
+
+    with SEL select
+        NextPC &lt;= PCplus1   when &quot;00&quot;,
+                  ID_result when &quot;01&quot;,
+                  EX_result when &quot;10&quot;,
+                  (others =&gt; &apos;0&apos;) when others;
+
+end Behavorial;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>NextPC:32</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>8</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-1920" y="280"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>MemToReg</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>MemOutput:32,ALUOutput:32,SEL</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity MemToReg is
+    Port (
+        MemOutput	: in  std_logic_vector(31 downto 0); -- Entrada de dados 0
+        ALUOutput	: in  std_logic_vector(31 downto 0); -- Entrada de dados 1
+        SEL		: in  std_logic; -- Linha de seleção
+        DataOut		: out std_logic_vector(31 downto 0)  -- Saída de dados
+    );
+end MemToReg;
+
+architecture Behavorial of MemToReg is
+begin
+    process(MemOutput, ALUOutput, SEL)
+    begin
+        case SEL is
+            when &apos;1&apos;   =&gt; DataOut &lt;= MemOutput;
+            when &apos;0&apos;   =&gt; DataOut &lt;= ALUOutput;
+            when others =&gt; DataOut &lt;= (others =&gt; &apos;0&apos;); -- Cobre o caso &quot;11&quot; e outros possíveis (U, X, etc.)
+        end case;
+    end process;
+
+end Behavorial;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>DataOut:32</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>9</int>
+        </entry>
+      </elementAttributes>
+      <pos x="2300" y="200"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>Mux_ControlSignals</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>stall,EXSignals_in:5,MEMSignals_in:2,WBSignals_in:2</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity Mux_ControlSignals is
+    Port (
+        stall		: in  std_logic;
+        EXSignals_in	: in  STD_LOGIC_VECTOR(4 downto 0);
+        MEMSignals_in	: in  STD_LOGIC_VECTOR(1 downto 0);
+        WBSignals_in	: in  STD_LOGIC_VECTOR(1 downto 0);
+        EXSignals_out	: out STD_LOGIC_VECTOR(4 downto 0);
+        MEMSignals_out	: out STD_LOGIC_VECTOR(1 downto 0);
+        WBSignals_out	: out STD_LOGIC_VECTOR(1 downto 0)
+    );
+end Mux_ControlSignals;
+
+architecture Behavorial of Mux_ControlSignals is
+begin
+    process(EXSignals_in, MEMSignals_in, WBSignals_in, stall)
+    begin
+        case stall is
+            when &apos;0&apos; =&gt; 
+		EXSignals_out &lt;= EXSignals_in;
+		MEMSignals_out &lt;= MEMSignals_in;
+		WBSignals_out &lt;= WBSignals_in;
+            when others =&gt;
+		EXSignals_out &lt;= (others =&gt; &apos;0&apos;);
+		MEMSignals_out &lt;= (others =&gt; &apos;0&apos;);
+		WBSignals_out &lt;= (others =&gt; &apos;0&apos;);
+        end case;
+    end process;
+
+end Behavorial;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>EXSignals_out:5,MEMSignals_out:2,WBSignals_out:2</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>15</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-540" y="40"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>Control</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>JALR_2ndCycle,Instr:32</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity Control is
+    Port (
+        JALR_2ndCycle : in  std_logic;
+        Instr         : in  std_logic_vector(31 downto 0);
+
+        JALR          : out std_logic;
+        JAL           : out std_logic;
+        BranchEQ      : out std_logic;
+        BranchNEQ     : out std_logic;
+        EXSignals     : out std_logic_vector(4 downto 0);
+        MEMSignals    : out std_logic_vector(1 downto 0);
+        WBSignals     : out std_logic_vector(1 downto 0);
+        ImmSrc        : out std_logic
+    );
+end Control;
+
+architecture Behavioral of Control is
+    signal opcode    : std_logic_vector(6 downto 0);
+    signal funct3    : std_logic_vector(2 downto 0);
+
+    -- Sinais intermediários
+    signal ALUOp     : std_logic_vector(1 downto 0);
+    signal ALUSrcA   : std_logic_vector(1 downto 0);
+    signal ALUSrcB   : std_logic;
+    signal MemRead   : std_logic;
+    signal MemWrite  : std_logic;
+    signal RegWrite  : std_logic;
+    signal MemToReg  : std_logic;
+    signal imm1      : std_logic;
+    signal isJAL     : std_logic;
+    signal isBEQ     : std_logic;
+    signal isBNE     : std_logic;
+    signal isJALR    : std_logic;
+begin
+
+    opcode &lt;= Instr(6 downto 0);
+    funct3 &lt;= Instr(14 downto 12);
+
+    -- Sinais default
+    ALUOp     &lt;= &quot;11&quot; when JALR_2ndCycle = &apos;1&apos; else
+                 &quot;01&quot; when opcode = &quot;0110011&quot; else  -- R-type
+                 &quot;10&quot; when opcode = &quot;0010011&quot; else  -- I-type
+                 &quot;11&quot; when opcode = &quot;0000011&quot; or    -- lw
+                           opcode = &quot;0100011&quot; or -- sw
+                           opcode = &quot;1101111&quot; or -- jal
+                           opcode = &quot;1100111&quot; or -- jalr
+                           opcode = &quot;0010111&quot; or -- auipc
+                           opcode = &quot;0110111&quot;    -- lui
+                 else &quot;00&quot;;
+
+    ALUSrcA &lt;= &quot;01&quot; when JALR_2ndCycle = &apos;1&apos; else
+               &quot;00&quot; when opcode = &quot;0110011&quot; or  -- R-type
+                            opcode = &quot;0010011&quot; or
+                            opcode = &quot;0000011&quot; or
+                            opcode = &quot;0100011&quot; or
+                            opcode = &quot;1100111&quot;    -- jalr
+               else
+               &quot;01&quot; when opcode = &quot;1101111&quot; or   -- jal
+                                opcode = &quot;0010111&quot; -- auipc
+               else
+               &quot;10&quot; when opcode = &quot;0110111&quot;       -- lui
+               else &quot;00&quot;;
+
+    ALUSrcB &lt;= &apos;1&apos; when JALR_2ndCycle = &apos;1&apos; or
+                        opcode = &quot;0010011&quot; or -- I-type
+                        opcode = &quot;0000011&quot; or -- lw
+                        opcode = &quot;0100011&quot; or -- sw
+                        opcode = &quot;1101111&quot; or -- jal
+                        opcode = &quot;1100111&quot; or -- jalr
+                        opcode = &quot;0010111&quot; or -- auipc
+                        opcode = &quot;0110111&quot;    -- lui
+               else &apos;0&apos;;
+
+    MemRead &lt;= &apos;0&apos; when JALR_2ndCycle = &apos;1&apos; else
+               &apos;1&apos; when opcode = &quot;0000011&quot; else
+               &apos;0&apos;;
+
+    MemWrite &lt;= &apos;0&apos; when JALR_2ndCycle = &apos;1&apos; else
+                &apos;1&apos; when opcode = &quot;0100011&quot; else
+                &apos;0&apos;;
+
+    RegWrite &lt;= &apos;1&apos; when JALR_2ndCycle = &apos;1&apos; else
+                &apos;1&apos; when opcode = &quot;0110011&quot; or -- R-type
+                                 opcode = &quot;0010011&quot; or -- I-type
+                                 opcode = &quot;0000011&quot; or -- lw
+                                 opcode = &quot;1101111&quot; or -- jal
+                                 opcode = &quot;0010111&quot; or -- auipc
+                                 opcode = &quot;0110111&quot;    -- lui
+                else &apos;0&apos;;
+
+    MemToReg &lt;= &apos;1&apos; when JALR_2ndCycle = &apos;0&apos; and opcode = &quot;0000011&quot; else &apos;0&apos;;
+
+    imm1 &lt;= &apos;1&apos; when JALR_2ndCycle = &apos;1&apos; or opcode = &quot;1101111&quot; else &apos;0&apos;;
+
+    isJAL  &lt;= &apos;1&apos; when JALR_2ndCycle = &apos;0&apos; and opcode = &quot;1101111&quot; else &apos;0&apos;;
+
+    isJALR &lt;= &apos;1&apos; when JALR_2ndCycle = &apos;0&apos; and opcode = &quot;1100111&quot; else &apos;0&apos;;
+
+    isBEQ  &lt;= &apos;1&apos; when JALR_2ndCycle = &apos;0&apos; and opcode = &quot;1100011&quot; and funct3 = &quot;000&quot; else &apos;0&apos;;
+    isBNE  &lt;= &apos;1&apos; when JALR_2ndCycle = &apos;0&apos; and opcode = &quot;1100011&quot; and funct3 = &quot;001&quot; else &apos;0&apos;;
+
+    -- Atribuições finais
+    EXSignals  &lt;= ALUOp &amp; ALUSrcB &amp; ALUSrcA;
+    MEMSignals &lt;= MemWrite &amp; MemRead;
+    WBSignals  &lt;= RegWrite &amp; MemToReg;
+    ImmSrc     &lt;= imm1;
+    JAL        &lt;= isJAL;
+    JALR       &lt;= isJALR;
+    BranchEQ   &lt;= isBEQ;
+    BranchNEQ  &lt;= isBNE;
+
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>JALR,JAL,BranchEQ,BranchNEQ,EXSignals:5,MEMSignals:2,WBSignals:2,ImmSrc</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>13</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-980" y="-200"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>JALR_2ndCycle_FF</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>clk,rst,JALR_in</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity JALR_2ndCycle_FF is
+    Port (
+        clk          : in  std_logic;
+        rst          : in  std_logic;
+        JALR_in      : in  std_logic;  -- sinal JALR do Control
+        JALR_2ndCycle: out std_logic   -- sinal que indica o 2º ciclo
+    );
+end JALR_2ndCycle_FF;
+
+architecture Behavioral of JALR_2ndCycle_FF is
+    signal jalr_reg : std_logic := &apos;0&apos;;
+begin
+    process(clk, rst)
+    begin
+        if rst = &apos;1&apos; then
+            jalr_reg &lt;= &apos;0&apos;;
+        elsif rising_edge(clk) then
+            jalr_reg &lt;= JALR_in;
+        end if;
+    end process;
+
+    JALR_2ndCycle &lt;= jalr_reg;
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>JALR_2ndCycle</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>13</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-980" y="-340"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>Mux_ImmSrc</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>SEL,imm_in:32</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity Mux_ImmSrc is
+    Port (
+	SEL	: in  std_logic; -- Linha de seleção
+        imm_in	: in  std_logic_vector(31 downto 0); -- Entrada de dados 0
+        imm_out	: out std_logic_vector(31 downto 0)  -- Saída de dados
+    );
+end Mux_ImmSrc;
+
+architecture Behavorial of Mux_ImmSrc is
+begin
+    process(imm_in, SEL)
+    begin
+        case SEL is
+            when &apos;0&apos;   =&gt; imm_out &lt;= imm_in;
+            when others =&gt;
+		imm_out(0) &lt;= &apos;1&apos;;
+		imm_out(31 downto 1) &lt;= (others =&gt; &apos;0&apos;);
+        end case;
+    end process;
+
+end Behavorial;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>imm_out:32</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>7</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-480" y="400"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>HazardUnit</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>ID_EX_MemRead,ID_EX_RegisterRd:5,IF_ID_RegisterRs1:5,IF_ID_RegisterRs2:5</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity HazardUnit is
+    Port (
+        ID_EX_MemRead    : in  std_logic;
+        ID_EX_RegisterRd : in  std_logic_vector(4 downto 0);
+        IF_ID_RegisterRs1: in  std_logic_vector(4 downto 0);
+        IF_ID_RegisterRs2: in  std_logic_vector(4 downto 0);
+
+        StallPipeline    : out std_logic
+    );
+end HazardUnit;
+
+architecture Behavioral of HazardUnit is
+begin
+    process(ID_EX_MemRead, ID_EX_RegisterRd, IF_ID_RegisterRs1, IF_ID_RegisterRs2)
+    begin
+        if (ID_EX_MemRead = &apos;1&apos;) and
+           ((ID_EX_RegisterRd = IF_ID_RegisterRs1) or
+            (ID_EX_RegisterRd = IF_ID_RegisterRs2)) then
+            StallPipeline &lt;= &apos;1&apos;;
+        else
+            StallPipeline &lt;= &apos;0&apos;;
+        end if;
+    end process;
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>StallPipeline</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>9</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-940" y="-520"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>ALU</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>ALUctl:4,A:32,B:32</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity ALU is
+    Port (
+        ALUctl  : in  std_logic_vector(3 downto 0);
+        A       : in  std_logic_vector(31 downto 0);
+        B       : in  std_logic_vector(31 downto 0);
+        ALUOut  : out std_logic_vector(31 downto 0)
+    );
+end ALU;
+
+architecture Behavioral of ALU is
+    signal result : std_logic_vector(31 downto 0);
+begin
+
+    process(ALUctl, A, B)
+        variable A_int : signed(31 downto 0);
+        variable B_int : signed(31 downto 0);
+    begin
+        A_int := signed(A);
+        B_int := signed(B);
+
+        case ALUctl is
+            when &quot;0000&quot; =&gt; -- AND
+                result &lt;= A and B;
+
+            when &quot;0001&quot; =&gt; -- OR
+                result &lt;= A or B;
+
+            when &quot;0010&quot; =&gt; -- ADD
+                result &lt;= std_logic_vector(A_int + B_int);
+
+            when &quot;0110&quot; =&gt; -- SUB
+                result &lt;= std_logic_vector(A_int - B_int);
+
+            when &quot;1000&quot; =&gt; -- SLL (Shift Left Logical)
+                result &lt;= std_logic_vector(shift_left(unsigned(A), to_integer(unsigned(B(4 downto 0)))));
+
+            when &quot;1001&quot; =&gt; -- SRL (Shift Right Logical)
+                result &lt;= std_logic_vector(shift_right(unsigned(A), to_integer(unsigned(B(4 downto 0)))));
+
+            when &quot;1100&quot; =&gt; -- XOR
+                result &lt;= A xor B;
+
+            when others =&gt;
+                result &lt;= (others =&gt; &apos;0&apos;);
+        end case;
+    end process;
+
+    ALUOut &lt;= result;
+
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>ALUOut:32</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>7</int>
+        </entry>
+      </elementAttributes>
+      <pos x="820" y="200"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>FowardingA</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>ID_EX:32,EX_MEM:32,MEM_WB:32,SEL:2</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity FowardingA is
+    Port (
+        ID_EX	: in  std_logic_vector(31 downto 0); -- Entrada de dados 0
+        EX_MEM	: in  std_logic_vector(31 downto 0); -- Entrada de dados 1
+        MEM_WB	: in  std_logic_vector(31 downto 0); -- Entrada de dados 2
+        SEL		: in  std_logic_vector(1 downto 0); -- Linha de seleção de 2 bits
+        A		: out std_logic_vector(31 downto 0)  -- Saída de dados
+    );
+end FowardingA;
+
+architecture Behavorial of FowardingA is
+begin
+    process(ID_EX, EX_MEM, MEM_WB, SEL)
+    begin
+        case SEL is
+            when &quot;00&quot;   =&gt; A &lt;= ID_EX;
+            when &quot;10&quot;   =&gt; A &lt;= EX_MEM;
+            when &quot;01&quot;   =&gt; A &lt;= MEM_WB;
+            when others =&gt; A &lt;= (others =&gt; &apos;0&apos;); -- casos invalidos
+        end case;
+    end process;
+
+end Behavorial;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>A:32</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>5</int>
+        </entry>
+      </elementAttributes>
+      <pos x="520" y="40"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>FowardingB</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>ID_EX:32,EX_MEM:32,MEM_WB:32,SEL:2</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity FowardingB is
+    Port (
+        ID_EX	: in  std_logic_vector(31 downto 0); -- Entrada de dados 0
+        EX_MEM	: in  std_logic_vector(31 downto 0); -- Entrada de dados 1
+        MEM_WB	: in  std_logic_vector(31 downto 0); -- Entrada de dados 2
+        SEL		: in  std_logic_vector(1 downto 0); -- Linha de seleção de 2 bits
+        B		: out std_logic_vector(31 downto 0)  -- Saída de dados
+    );
+end FowardingB;
+
+architecture Behavorial of FowardingB is
+begin
+    process(ID_EX, EX_MEM, MEM_WB, SEL)
+    begin
+        case SEL is
+            when &quot;00&quot;   =&gt; B &lt;= ID_EX;
+            when &quot;10&quot;   =&gt; B &lt;= EX_MEM;
+            when &quot;01&quot;   =&gt; B &lt;= MEM_WB;
+            when others =&gt; B &lt;= (others =&gt; &apos;0&apos;); -- casos invalidos
+        end case;
+    end process;
+
+end Behavorial;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>B:32</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>5</int>
+        </entry>
+      </elementAttributes>
+      <pos x="520" y="240"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>ALUControl</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>ALUOp:2,Funct3:3,Funct7:7</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity ALUControl is
+    Port (
+        ALUOp	: in  std_logic_vector(1 downto 0);
+        Funct3	: in  std_logic_vector(2 downto 0);
+        Funct7	: in  std_logic_vector(6 downto 0);  -- Bit 30 da instrucao
+        ALUCtl	: out std_logic_vector(3 downto 0)
+    );
+end ALUControl;
+
+architecture Behavioral of ALUControl is
+signal Funct7bit5 : std_logic;
+begin
+Funct7bit5 &lt;= Funct7(5);
+    process(ALUOp, Funct3, Funct7bit5)
+    begin
+        case ALUOp is
+	    -- 00: Para instrucoes do tipo branch (BEQ, BNE), usam SUB para comparacao
+            when &quot;00&quot; =&gt;
+                ALUCtl &lt;= &quot;0110&quot;;  -- SUB
+
+            -- 01: Para instrucoes do tipo R-Type (ADD, AND, OR, SLL, SRL, SUB, XOR)
+            when &quot;01&quot; =&gt;
+		case Funct3 is
+                    when &quot;000&quot; =&gt;  -- ADD ou SUB
+                        if Funct7bit5 = &apos;0&apos; then
+                            ALUCtl &lt;= &quot;0010&quot;; -- ADD
+                        else
+                            ALUCtl &lt;= &quot;0110&quot;; -- SUB
+                        end if;
+                    when &quot;111&quot; =&gt; ALUCtl &lt;= &quot;0000&quot;; -- AND
+                    when &quot;110&quot; =&gt; ALUCtl &lt;= &quot;0001&quot;; -- OR
+                    when &quot;001&quot; =&gt; ALUCtl &lt;= &quot;1000&quot;; -- SLL 
+                    when &quot;101&quot; =&gt; ALUCtl &lt;= &quot;1001&quot;; -- SRL 
+                    when &quot;100&quot; =&gt; ALUCtl &lt;= &quot;1100&quot;; -- XOR 
+                    when others =&gt; ALUCtl &lt;= &quot;1111&quot;; -- invalido
+                end case;
+
+            -- 10: Para instrucoes do tipo I-Type (ADDI, ANDI, ORI, SLLI, SRLI, XORI)
+            when &quot;10&quot; =&gt;
+		case Funct3 is
+                    when &quot;000&quot; =&gt; ALUCtl &lt;= &quot;0010&quot;; -- ADDI  
+                    when &quot;111&quot; =&gt; ALUCtl &lt;= &quot;0000&quot;; -- ANDI
+                    when &quot;110&quot; =&gt; ALUCtl &lt;= &quot;0001&quot;; -- ORI
+                    when &quot;001&quot; =&gt; ALUCtl &lt;= &quot;1000&quot;; -- SLLI 
+                    when &quot;101&quot; =&gt; ALUCtl &lt;= &quot;1001&quot;; -- SRLI 
+                    when &quot;100&quot; =&gt; ALUCtl &lt;= &quot;1100&quot;; -- XORI 
+                    when others =&gt; ALUCtl &lt;= &quot;1111&quot;; -- invalido
+                end case;
+
+            -- 11: Para instrucoes que usam a ALU para soma 
+            when &quot;11&quot; =&gt;
+                ALUCtl &lt;= &quot;0010&quot;; 
+
+            -- Default
+            when others =&gt;
+                ALUCtl &lt;= &quot;1111&quot;; -- invalido
+        end case;
+    end process;
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>ALUCtl:4</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>7</int>
+        </entry>
+      </elementAttributes>
+      <pos x="620" y="400"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>RegisterFile</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>Din:32,we,Rw:5,C,Ra:5,Rb:5,rst</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+USE ieee.numeric_std.all;
+
+entity RegisterFile is
+port (
+    	Da: out std_logic_vector (31 downto 0);
+    	Db: out std_logic_vector (31 downto 0);
+    	Din: in std_logic_vector (31 downto 0);
+    	we: in std_logic;
+    	Rw: in std_logic_vector (4 downto 0);
+    	C: in std_logic;
+    	Ra: in std_logic_vector (4 downto 0);
+    	Rb: in std_logic_vector (4 downto 0);
+	rst: in std_logic
+	);
+end RegisterFile;
+
+architecture Behavioral of RegisterFile is
+    type memoryType is array(0 to (2**5)-1) of STD_LOGIC_VECTOR((31) downto 0);
+    signal memory : memoryType;
+begin
+  process (C, rst)
+  begin
+	if rst = &apos;1&apos; then
+		for i in 0 to 31 loop
+			memory(i) &lt;= (others =&gt; &apos;0&apos;);
+		end loop;
+    	elsif falling_edge(C) AND (we=&apos;1&apos;) AND (to_integer(unsigned(Rw)) /= 0) then
+      		memory(to_integer(unsigned(Rw))) &lt;= Din;
+    	end if;
+  end process;
+  Da &lt;= memory(to_integer(unsigned(Ra)));
+  Db &lt;= memory(to_integer(unsigned(Rb)));
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>Da:32,Db:32</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>4</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-820" y="240"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>ForwardingUnit</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>ID_EX_RegisterRs1:5,ID_EX_RegisterRs2:5,EX_MEM_RegisterRd:5,EX_MEM_RegWrite,MEM_WB_RegisterRd:5,MEM_WB_RegWrite</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity ForwardingUnit is
+    Port (
+        ID_EX_RegisterRs1  : in  std_logic_vector(4 downto 0);
+        ID_EX_RegisterRs2  : in  std_logic_vector(4 downto 0);
+
+        EX_MEM_RegisterRd  : in  std_logic_vector(4 downto 0);
+        EX_MEM_RegWrite    : in  std_logic;
+
+        MEM_WB_RegisterRd  : in  std_logic_vector(4 downto 0);
+        MEM_WB_RegWrite    : in  std_logic;
+
+        ForwardA           : out std_logic_vector(1 downto 0);
+        ForwardB           : out std_logic_vector(1 downto 0)
+    );
+end ForwardingUnit;
+
+architecture Behavioral of ForwardingUnit is
+begin
+    process(ID_EX_RegisterRs1, ID_EX_RegisterRs2, EX_MEM_RegisterRd, EX_MEM_RegWrite,
+            MEM_WB_RegisterRd, MEM_WB_RegWrite)
+    begin
+        -- forwardA, verifica se o rd escreve no registrador, se ele eh o x0 e se ele
+				-- eh igual ao registrador source1 que ira ocorrer a execucao
+				-- caso essas 3 condicoes sejam cumpridas eh enviado para o MUX de forwardA o sinal 10
+				-- esse eh o EX HAZARD:
+        if (EX_MEM_RegWrite = &apos;1&apos;) and (EX_MEM_RegisterRd /= &quot;00000&quot;) and
+           (EX_MEM_RegisterRd = ID_EX_RegisterRs1) then
+            ForwardA &lt;= &quot;10&quot;;
+            
+        -- esse eh o MEM HAZARD, tem que verificar se eh o foward mais recente, nao pode encaminhar
+        -- do MEM se acabou de sair um novo valor do estagio EX.
+        elsif (MEM_WB_RegWrite = &apos;1&apos;) and (MEM_WB_RegisterRd /= &quot;00000&quot;) and
+              not (EX_MEM_RegWrite = &apos;1&apos; and EX_MEM_RegisterRd /= &quot;00000&quot; and
+                   EX_MEM_RegisterRd = ID_EX_RegisterRs1) and
+              (MEM_WB_RegisterRd = ID_EX_RegisterRs1) then
+            ForwardA &lt;= &quot;01&quot;;
+        else
+            ForwardA &lt;= &quot;00&quot;;
+        end if;
+
+        -- mesma coisa que antes mas para o forwardB
+        if (EX_MEM_RegWrite = &apos;1&apos;) and (EX_MEM_RegisterRd /= &quot;00000&quot;) and
+           (EX_MEM_RegisterRd = ID_EX_RegisterRs2) then
+            ForwardB &lt;= &quot;10&quot;;
+            
+        elsif (MEM_WB_RegWrite = &apos;1&apos;) and (MEM_WB_RegisterRd /= &quot;00000&quot;) and
+              not (EX_MEM_RegWrite = &apos;1&apos; and EX_MEM_RegisterRd /= &quot;00000&quot; and
+                   EX_MEM_RegisterRd = ID_EX_RegisterRs2) and
+              (MEM_WB_RegisterRd = ID_EX_RegisterRs2) then
+            ForwardB &lt;= &quot;01&quot;;
+        else
+            ForwardB &lt;= &quot;00&quot;;
+        end if;
+    end process;
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>ForwardA:2,ForwardB:2</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>15</int>
+        </entry>
+      </elementAttributes>
+      <pos x="560" y="540"/>
+    </visualElement>
+    <visualElement>
+      <elementName>External</elementName>
+      <elementAttributes>
+        <entry>
+          <string>applicationType</string>
+          <appType>GHDL</appType>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>PC</string>
+        </entry>
+        <entry>
+          <string>externalInputs</string>
+          <string>rst,clk,PC_in:32,PC_WRITE</string>
+        </entry>
+        <entry>
+          <string>Code</string>
+          <string>library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity PC is
+    Port ( 
+	rst     	: in  STD_LOGIC; 
+        clk		: in  STD_LOGIC;
+
+        PC_in		: in  STD_LOGIC_VECTOR(31 downto 0);
+	PC_WRITE	: in STD_LOGIC;
+	PC_out		: out STD_LOGIC_VECTOR(31 downto 0);
+	PC_out_16b	: out STD_LOGIC_VECTOR(15 downto 0)
+    );
+end PC;
+
+architecture Behavioral of PC is
+
+signal s_dado : STD_LOGIC_VECTOR(31 downto 0);
+
+begin
+
+process(clk,rst)
+begin
+	if rst = &apos;1&apos; then
+		PC_out &lt;= (others =&gt; &apos;0&apos;);
+        elsif rising_edge(clk) and PC_WRITE=&apos;0&apos; then
+		PC_out &lt;= PC_in;
+	end if;
+end process;
+
+PC_out_16b &lt;= PC_out(15 downto 0);
+
+end Behavioral;</string>
+        </entry>
+        <entry>
+          <string>externalOutputs</string>
+          <string>PC_out:32,PC_out_16b:16</string>
+        </entry>
+        <entry>
+          <string>Width</string>
+          <int>7</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-1700" y="300"/>
+    </visualElement>
+    <visualElement>
+      <elementName>ROM</elementName>
+      <elementAttributes>
+        <entry>
+          <string>AddrBits</string>
+          <int>16</int>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>InstMem</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+        <entry>
+          <string>Data</string>
+          <data>0,800093,40e113,417193,a14213,209293,100563,20d313,1020a3,3103b3
+,417433,4164b3,414533,401105b3,619633,819563,62d6b3,102703,818363
+,5*100993,311363,5*100993,1797,2837,6008ef,5*100993,c28967,5*100993
+,ffc08a13,a2a83,a8b33</data>
+        </entry>
+      </elementAttributes>
+      <pos x="-1520" y="340"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Or</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>wideShape</string>
+          <boolean>true</boolean>
+        </entry>
+      </elementAttributes>
+      <pos x="-1560" y="-200"/>
+    </visualElement>
+    <visualElement>
+      <elementName>And</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="1"/>
+        </entry>
+        <entry>
+          <string>wideShape</string>
+          <boolean>true</boolean>
+        </entry>
+      </elementAttributes>
+      <pos x="-480" y="-280"/>
+    </visualElement>
+    <visualElement>
+      <elementName>And</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="1"/>
+        </entry>
+        <entry>
+          <string>wideShape</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>inverterConfig</string>
+          <inverterConfig>
+            <string>In_1</string>
+          </inverterConfig>
+        </entry>
+      </elementAttributes>
+      <pos x="-360" y="-280"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Or</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>wideShape</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
+          <string>Inputs</string>
+          <int>3</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-2160" y="-360"/>
+    </visualElement>
+    <visualElement>
+      <elementName>VDD</elementName>
+      <elementAttributes/>
+      <pos x="-1540" y="420"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>NetName</string>
+          <string>CLK</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-1860" y="-440"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes/>
+      <pos x="-1900" y="-440"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>NetName</string>
+          <string>RST</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-1860" y="-380"/>
+    </visualElement>
+    <visualElement>
+      <elementName>In</elementName>
+      <elementAttributes/>
+      <pos x="-1900" y="-380"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>RST</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-1420" y="140"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>CLK</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-1420" y="160"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>CLK</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-980" y="-340"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>CLK</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-1700" y="320"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>CLK</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-100" y="120"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>CLK</string>
+        </entry>
+      </elementAttributes>
+      <pos x="1060" y="200"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>CLK</string>
+        </entry>
+      </elementAttributes>
+      <pos x="1500" y="160"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>CLK</string>
+        </entry>
+      </elementAttributes>
+      <pos x="1900" y="200"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>RST</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-980" y="-320"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>RST</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-820" y="360"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>RST</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-100" y="100"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>RST</string>
+        </entry>
+      </elementAttributes>
+      <pos x="1060" y="180"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>RST</string>
+        </entry>
+      </elementAttributes>
+      <pos x="1900" y="180"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>CLK</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-820" y="300"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Tunnel</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="2"/>
+        </entry>
+        <entry>
+          <string>NetName</string>
+          <string>RST</string>
+        </entry>
+      </elementAttributes>
+      <pos x="-1700" y="300"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>Inst</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-1340" y="360"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>ALUout</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="1000" y="100"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>Label</string>
+          <string>MEMout</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="1780" y="260"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>DataOut</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="2580" y="240"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>NextPC</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-1640" y="460"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>Inst</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
+        </entry>
+      </elementAttributes>
+      <pos x="-980" y="-20"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Out</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Label</string>
+          <string>rd</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>5</int>
+        </entry>
+      </elementAttributes>
+      <pos x="2280" y="660"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Or</elementName>
+      <elementAttributes>
+        <entry>
+          <string>rotation</string>
+          <rotation rotation="3"/>
+        </entry>
+        <entry>
+          <string>wideShape</string>
+          <boolean>true</boolean>
+        </entry>
+      </elementAttributes>
+      <pos x="-1440" y="-180"/>
+    </visualElement>
+  </visualElements>
+  <wires>
+    <wire>
+      <p1 x="-1980" y="0"/>
+      <p2 x="-680" y="0"/>
+    </wire>
+    <wire>
+      <p1 x="1380" y="640"/>
+      <p2 x="1880" y="640"/>
+    </wire>
+    <wire>
+      <p1 x="540" y="640"/>
+      <p2 x="560" y="640"/>
+    </wire>
+    <wire>
+      <p1 x="1860" y="260"/>
+      <p2 x="1900" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="-740" y="260"/>
+      <p2 x="-580" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="-1120" y="260"/>
+      <p2 x="-1080" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="-220" y="260"/>
+      <p2 x="-100" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="2200" y="260"/>
+      <p2 x="2220" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="-880" y="260"/>
+      <p2 x="-820" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="1000" y="260"/>
+      <p2 x="1060" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="260"/>
+      <p2 x="340" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="440" y="260"/>
+      <p2 x="520" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="1360" y="260"/>
+      <p2 x="1400" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="-460" y="260"/>
+      <p2 x="-400" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="660" y="260"/>
+      <p2 x="980" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="-960" y="-520"/>
+      <p2 x="-940" y="-520"/>
+    </wire>
+    <wire>
+      <p1 x="480" y="520"/>
+      <p2 x="880" y="520"/>
+    </wire>
+    <wire>
+      <p1 x="-720" y="-140"/>
+      <p2 x="-320" y="-140"/>
+    </wire>
+    <wire>
+      <p1 x="-1120" y="140"/>
+      <p2 x="-980" y="140"/>
+    </wire>
+    <wire>
+      <p1 x="-160" y="140"/>
+      <p2 x="-100" y="140"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="140"/>
+      <p2 x="640" y="140"/>
+    </wire>
+    <wire>
+      <p1 x="-980" y="140"/>
+      <p2 x="-220" y="140"/>
+    </wire>
+    <wire>
+      <p1 x="-660" y="400"/>
+      <p2 x="-480" y="400"/>
+    </wire>
+    <wire>
+      <p1 x="340" y="400"/>
+      <p2 x="620" y="400"/>
+    </wire>
+    <wire>
+      <p1 x="440" y="-20"/>
+      <p2 x="1380" y="-20"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="-20"/>
+      <p2 x="-980" y="-20"/>
+    </wire>
+    <wire>
+      <p1 x="1380" y="-20"/>
+      <p2 x="1840" y="-20"/>
+    </wire>
+    <wire>
+      <p1 x="-2200" y="-660"/>
+      <p2 x="-580" y="-660"/>
+    </wire>
+    <wire>
+      <p1 x="240" y="660"/>
+      <p2 x="1000" y="660"/>
+    </wire>
+    <wire>
+      <p1 x="2240" y="660"/>
+      <p2 x="2280" y="660"/>
+    </wire>
+    <wire>
+      <p1 x="1880" y="280"/>
+      <p2 x="1900" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="-580" y="280"/>
+      <p2 x="-560" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="-200" y="280"/>
+      <p2 x="-100" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="-1940" y="280"/>
+      <p2 x="-1920" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="-900" y="280"/>
+      <p2 x="-820" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="620" y="280"/>
+      <p2 x="660" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="1020" y="280"/>
+      <p2 x="1060" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="1360" y="280"/>
+      <p2 x="1380" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="280"/>
+      <p2 x="280" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="660" y="280"/>
+      <p2 x="680" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="-1000" y="540"/>
+      <p2 x="-220" y="540"/>
+    </wire>
+    <wire>
+      <p1 x="280" y="540"/>
+      <p2 x="560" y="540"/>
+    </wire>
+    <wire>
+      <p1 x="860" y="540"/>
+      <p2 x="880" y="540"/>
+    </wire>
+    <wire>
+      <p1 x="-720" y="-160"/>
+      <p2 x="-480" y="-160"/>
+    </wire>
+    <wire>
+      <p1 x="-1740" y="160"/>
+      <p2 x="-1720" y="160"/>
+    </wire>
+    <wire>
+      <p1 x="-1580" y="160"/>
+      <p2 x="-1560" y="160"/>
+    </wire>
+    <wire>
+      <p1 x="-1120" y="160"/>
+      <p2 x="-1020" y="160"/>
+    </wire>
+    <wire>
+      <p1 x="-180" y="160"/>
+      <p2 x="-100" y="160"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="160"/>
+      <p2 x="380" y="160"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="160"/>
+      <p2 x="-980" y="160"/>
+    </wire>
+    <wire>
+      <p1 x="-920" y="800"/>
+      <p2 x="460" y="800"/>
+    </wire>
+    <wire>
+      <p1 x="460" y="800"/>
+      <p2 x="2520" y="800"/>
+    </wire>
+    <wire>
+      <p1 x="760" y="420"/>
+      <p2 x="800" y="420"/>
+    </wire>
+    <wire>
+      <p1 x="320" y="420"/>
+      <p2 x="620" y="420"/>
+    </wire>
+    <wire>
+      <p1 x="-340" y="420"/>
+      <p2 x="-120" y="420"/>
+    </wire>
+    <wire>
+      <p1 x="-2120" y="-680"/>
+      <p2 x="-700" y="-680"/>
+    </wire>
+    <wire>
+      <p1 x="-240" y="40"/>
+      <p2 x="-160" y="40"/>
+    </wire>
+    <wire>
+      <p1 x="260" y="40"/>
+      <p2 x="520" y="40"/>
+    </wire>
+    <wire>
+      <p1 x="-560" y="40"/>
+      <p2 x="-540" y="40"/>
+    </wire>
+    <wire>
+      <p1 x="220" y="680"/>
+      <p2 x="1020" y="680"/>
+    </wire>
+    <wire>
+      <p1 x="-1000" y="-300"/>
+      <p2 x="-980" y="-300"/>
+    </wire>
+    <wire>
+      <p1 x="740" y="300"/>
+      <p2 x="780" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="-180" y="300"/>
+      <p2 x="-100" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="-1980" y="300"/>
+      <p2 x="-1920" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="1040" y="300"/>
+      <p2 x="1060" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="640" y="300"/>
+      <p2 x="680" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="460" y="300"/>
+      <p2 x="520" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="300"/>
+      <p2 x="260" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="-1560" y="300"/>
+      <p2 x="-1540" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="560"/>
+      <p2 x="-200" y="560"/>
+    </wire>
+    <wire>
+      <p1 x="260" y="560"/>
+      <p2 x="560" y="560"/>
+    </wire>
+    <wire>
+      <p1 x="860" y="560"/>
+      <p2 x="900" y="560"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="-180"/>
+      <p2 x="-980" y="-180"/>
+    </wire>
+    <wire>
+      <p1 x="-720" y="-180"/>
+      <p2 x="-580" y="-180"/>
+    </wire>
+    <wire>
+      <p1 x="-1120" y="180"/>
+      <p2 x="-1000" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="-200" y="180"/>
+      <p2 x="-100" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="2200" y="180"/>
+      <p2 x="2240" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="180"/>
+      <p2 x="660" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="1360" y="180"/>
+      <p2 x="1380" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="-1460" y="180"/>
+      <p2 x="-1420" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="1380" y="180"/>
+      <p2 x="1500" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="-1900" y="-440"/>
+      <p2 x="-1860" y="-440"/>
+    </wire>
+    <wire>
+      <p1 x="-1080" y="-440"/>
+      <p2 x="-940" y="-440"/>
+    </wire>
+    <wire>
+      <p1 x="-500" y="440"/>
+      <p2 x="-480" y="440"/>
+    </wire>
+    <wire>
+      <p1 x="300" y="440"/>
+      <p2 x="620" y="440"/>
+    </wire>
+    <wire>
+      <p1 x="-2280" y="440"/>
+      <p2 x="-1720" y="440"/>
+    </wire>
+    <wire>
+      <p1 x="-720" y="-60"/>
+      <p2 x="-660" y="-60"/>
+    </wire>
+    <wire>
+      <p1 x="-2220" y="-700"/>
+      <p2 x="980" y="-700"/>
+    </wire>
+    <wire>
+      <p1 x="-980" y="60"/>
+      <p2 x="-840" y="60"/>
+    </wire>
+    <wire>
+      <p1 x="-240" y="60"/>
+      <p2 x="-180" y="60"/>
+    </wire>
+    <wire>
+      <p1 x="-600" y="60"/>
+      <p2 x="-540" y="60"/>
+    </wire>
+    <wire>
+      <p1 x="440" y="60"/>
+      <p2 x="520" y="60"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="700"/>
+      <p2 x="1040" y="700"/>
+    </wire>
+    <wire>
+      <p1 x="-720" y="-320"/>
+      <p2 x="-700" y="-320"/>
+    </wire>
+    <wire>
+      <p1 x="-160" y="320"/>
+      <p2 x="-100" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="320"/>
+      <p2 x="-820" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="-580" y="320"/>
+      <p2 x="-240" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="320"/>
+      <p2 x="220" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="660" y="320"/>
+      <p2 x="680" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="500" y="320"/>
+      <p2 x="520" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="-2220" y="320"/>
+      <p2 x="-1920" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="-1560" y="320"/>
+      <p2 x="-1540" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="-1760" y="320"/>
+      <p2 x="-1740" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="-960" y="-580"/>
+      <p2 x="220" y="-580"/>
+    </wire>
+    <wire>
+      <p1 x="-1040" y="580"/>
+      <p2 x="-180" y="580"/>
+    </wire>
+    <wire>
+      <p1 x="480" y="580"/>
+      <p2 x="560" y="580"/>
+    </wire>
+    <wire>
+      <p1 x="-720" y="-200"/>
+      <p2 x="-700" y="-200"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="-200"/>
+      <p2 x="-980" y="-200"/>
+    </wire>
+    <wire>
+      <p1 x="-1120" y="200"/>
+      <p2 x="-1100" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="-580" y="200"/>
+      <p2 x="-240" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="-220" y="200"/>
+      <p2 x="-100" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="2200" y="200"/>
+      <p2 x="2300" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="200"/>
+      <p2 x="360" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="800" y="200"/>
+      <p2 x="820" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="1360" y="200"/>
+      <p2 x="1500" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="1720" y="200"/>
+      <p2 x="1740" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="-1500" y="200"/>
+      <p2 x="-1420" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="-1100" y="200"/>
+      <p2 x="-1020" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="500" y="840"/>
+      <p2 x="1360" y="840"/>
+    </wire>
+    <wire>
+      <p1 x="-1100" y="-460"/>
+      <p2 x="-940" y="-460"/>
+    </wire>
+    <wire>
+      <p1 x="-960" y="460"/>
+      <p2 x="-620" y="460"/>
+    </wire>
+    <wire>
+      <p1 x="-1740" y="460"/>
+      <p2 x="-1640" y="460"/>
+    </wire>
+    <wire>
+      <p1 x="-720" y="-80"/>
+      <p2 x="-640" y="-80"/>
+    </wire>
+    <wire>
+      <p1 x="-1580" y="-80"/>
+      <p2 x="-1500" y="-80"/>
+    </wire>
+    <wire>
+      <p1 x="-2280" y="-720"/>
+      <p2 x="-1440" y="-720"/>
+    </wire>
+    <wire>
+      <p1 x="-1440" y="-720"/>
+      <p2 x="-560" y="-720"/>
+    </wire>
+    <wire>
+      <p1 x="-700" y="80"/>
+      <p2 x="-680" y="80"/>
+    </wire>
+    <wire>
+      <p1 x="-240" y="80"/>
+      <p2 x="-200" y="80"/>
+    </wire>
+    <wire>
+      <p1 x="-620" y="80"/>
+      <p2 x="-540" y="80"/>
+    </wire>
+    <wire>
+      <p1 x="620" y="80"/>
+      <p2 x="680" y="80"/>
+    </wire>
+    <wire>
+      <p1 x="-140" y="340"/>
+      <p2 x="-100" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="-1040" y="340"/>
+      <p2 x="-820" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="340"/>
+      <p2 x="240" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="380" y="340"/>
+      <p2 x="640" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="-1540" y="340"/>
+      <p2 x="-1520" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="-1740" y="340"/>
+      <p2 x="-1700" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="-2120" y="340"/>
+      <p2 x="-1920" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="-980" y="-600"/>
+      <p2 x="240" y="-600"/>
+    </wire>
+    <wire>
+      <p1 x="-1060" y="600"/>
+      <p2 x="-160" y="600"/>
+    </wire>
+    <wire>
+      <p1 x="500" y="600"/>
+      <p2 x="560" y="600"/>
+    </wire>
+    <wire>
+      <p1 x="-1480" y="-220"/>
+      <p2 x="-1000" y="-220"/>
+    </wire>
+    <wire>
+      <p1 x="-1000" y="-220"/>
+      <p2 x="-700" y="-220"/>
+    </wire>
+    <wire>
+      <p1 x="-1740" y="220"/>
+      <p2 x="-1540" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-1120" y="220"/>
+      <p2 x="-1080" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-240" y="220"/>
+      <p2 x="-100" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="2200" y="220"/>
+      <p2 x="2300" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="2480" y="220"/>
+      <p2 x="2520" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="780" y="220"/>
+      <p2 x="820" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="960" y="220"/>
+      <p2 x="980" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="220"/>
+      <p2 x="320" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="1360" y="220"/>
+      <p2 x="1500" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="1740" y="220"/>
+      <p2 x="1780" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="1780" y="220"/>
+      <p2 x="1900" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="980" y="220"/>
+      <p2 x="1060" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-1540" y="220"/>
+      <p2 x="-1420" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-1080" y="220"/>
+      <p2 x="-1040" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="480" y="860"/>
+      <p2 x="1400" y="860"/>
+    </wire>
+    <wire>
+      <p1 x="-760" y="-480"/>
+      <p2 x="-560" y="-480"/>
+    </wire>
+    <wire>
+      <p1 x="-720" y="-100"/>
+      <p2 x="-620" y="-100"/>
+    </wire>
+    <wire>
+      <p1 x="-1940" y="100"/>
+      <p2 x="-1560" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="-960" y="100"/>
+      <p2 x="-840" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="-640" y="100"/>
+      <p2 x="-540" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="640" y="100"/>
+      <p2 x="680" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="100"/>
+      <p2 x="260" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="740" y="100"/>
+      <p2 x="780" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="460" y="100"/>
+      <p2 x="520" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="980" y="100"/>
+      <p2 x="1000" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="-880" y="740"/>
+      <p2 x="540" y="740"/>
+    </wire>
+    <wire>
+      <p1 x="540" y="740"/>
+      <p2 x="2220" y="740"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="360"/>
+      <p2 x="220" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="360" y="360"/>
+      <p2 x="660" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="-1460" y="360"/>
+      <p2 x="-1440" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="-120" y="360"/>
+      <p2 x="-100" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="-1720" y="360"/>
+      <p2 x="-1700" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="-2180" y="360"/>
+      <p2 x="-1920" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="-1440" y="360"/>
+      <p2 x="-1340" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="-2160" y="-620"/>
+      <p2 x="-460" y="-620"/>
+    </wire>
+    <wire>
+      <p1 x="-1080" y="620"/>
+      <p2 x="-140" y="620"/>
+    </wire>
+    <wire>
+      <p1 x="1400" y="620"/>
+      <p2 x="1860" y="620"/>
+    </wire>
+    <wire>
+      <p1 x="520" y="620"/>
+      <p2 x="560" y="620"/>
+    </wire>
+    <wire>
+      <p1 x="-440" y="-240"/>
+      <p2 x="-400" y="-240"/>
+    </wire>
+    <wire>
+      <p1 x="-2180" y="-240"/>
+      <p2 x="-1600" y="-240"/>
+    </wire>
+    <wire>
+      <p1 x="-400" y="-240"/>
+      <p2 x="-360" y="-240"/>
+    </wire>
+    <wire>
+      <p1 x="780" y="240"/>
+      <p2 x="820" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="-740" y="240"/>
+      <p2 x="-580" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="-1120" y="240"/>
+      <p2 x="-1060" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="-240" y="240"/>
+      <p2 x="-100" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="2200" y="240"/>
+      <p2 x="2300" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="-920" y="240"/>
+      <p2 x="-820" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="980" y="240"/>
+      <p2 x="1060" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="340" y="240"/>
+      <p2 x="520" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="240"/>
+      <p2 x="300" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="1840" y="240"/>
+      <p2 x="1900" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="-1440" y="240"/>
+      <p2 x="-1420" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="1360" y="240"/>
+      <p2 x="1500" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="2520" y="240"/>
+      <p2 x="2580" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="-580" y="240"/>
+      <p2 x="-560" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="-980" y="-500"/>
+      <p2 x="-940" y="-500"/>
+    </wire>
+    <wire>
+      <p1 x="-980" y="500"/>
+      <p2 x="-860" y="500"/>
+    </wire>
+    <wire>
+      <p1 x="-640" y="500"/>
+      <p2 x="-620" y="500"/>
+    </wire>
+    <wire>
+      <p1 x="500" y="500"/>
+      <p2 x="900" y="500"/>
+    </wire>
+    <wire>
+      <p1 x="-620" y="500"/>
+      <p2 x="-500" y="500"/>
+    </wire>
+    <wire>
+      <p1 x="-720" y="-120"/>
+      <p2 x="-600" y="-120"/>
+    </wire>
+    <wire>
+      <p1 x="-900" y="760"/>
+      <p2 x="520" y="760"/>
+    </wire>
+    <wire>
+      <p1 x="520" y="760"/>
+      <p2 x="2240" y="760"/>
+    </wire>
+    <wire>
+      <p1 x="660" y="120"/>
+      <p2 x="680" y="120"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="120"/>
+      <p2 x="340" y="120"/>
+    </wire>
+    <wire>
+      <p1 x="480" y="120"/>
+      <p2 x="520" y="120"/>
+    </wire>
+    <wire>
+      <p1 x="-1560" y="-380"/>
+      <p2 x="-1020" y="-380"/>
+    </wire>
+    <wire>
+      <p1 x="-1900" y="-380"/>
+      <p2 x="-1860" y="-380"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="-380"/>
+      <p2 x="-700" y="-380"/>
+    </wire>
+    <wire>
+      <p1 x="-1540" y="380"/>
+      <p2 x="-1520" y="380"/>
+    </wire>
+    <wire>
+      <p1 x="-2180" y="-640"/>
+      <p2 x="-340" y="-640"/>
+    </wire>
+    <wire>
+      <p1 x="640" y="300"/>
+      <p2 x="640" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="640" y="100"/>
+      <p2 x="640" y="140"/>
+    </wire>
+    <wire>
+      <p1 x="-900" y="280"/>
+      <p2 x="-900" y="760"/>
+    </wire>
+    <wire>
+      <p1 x="-1540" y="220"/>
+      <p2 x="-1540" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="-1540" y="380"/>
+      <p2 x="-1540" y="420"/>
+    </wire>
+    <wire>
+      <p1 x="-1540" y="320"/>
+      <p2 x="-1540" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="-2180" y="-280"/>
+      <p2 x="-2180" y="-240"/>
+    </wire>
+    <wire>
+      <p1 x="-2180" y="-640"/>
+      <p2 x="-2180" y="-360"/>
+    </wire>
+    <wire>
+      <p1 x="-2180" y="-240"/>
+      <p2 x="-2180" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="260" y="40"/>
+      <p2 x="260" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="260" y="300"/>
+      <p2 x="260" y="560"/>
+    </wire>
+    <wire>
+      <p1 x="900" y="500"/>
+      <p2 x="900" y="560"/>
+    </wire>
+    <wire>
+      <p1 x="520" y="620"/>
+      <p2 x="520" y="760"/>
+    </wire>
+    <wire>
+      <p1 x="-140" y="340"/>
+      <p2 x="-140" y="620"/>
+    </wire>
+    <wire>
+      <p1 x="780" y="240"/>
+      <p2 x="780" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="780" y="100"/>
+      <p2 x="780" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-1040" y="220"/>
+      <p2 x="-1040" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="-1040" y="340"/>
+      <p2 x="-1040" y="580"/>
+    </wire>
+    <wire>
+      <p1 x="-400" y="-240"/>
+      <p2 x="-400" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="1040" y="300"/>
+      <p2 x="1040" y="700"/>
+    </wire>
+    <wire>
+      <p1 x="-1940" y="100"/>
+      <p2 x="-1940" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="-660" y="-60"/>
+      <p2 x="-660" y="400"/>
+    </wire>
+    <wire>
+      <p1 x="660" y="120"/>
+      <p2 x="660" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="660" y="320"/>
+      <p2 x="660" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="660" y="260"/>
+      <p2 x="660" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="-1560" y="100"/>
+      <p2 x="-1560" y="160"/>
+    </wire>
+    <wire>
+      <p1 x="-1560" y="-380"/>
+      <p2 x="-1560" y="-200"/>
+    </wire>
+    <wire>
+      <p1 x="-920" y="240"/>
+      <p2 x="-920" y="800"/>
+    </wire>
+    <wire>
+      <p1 x="-2200" y="-660"/>
+      <p2 x="-2200" y="-360"/>
+    </wire>
+    <wire>
+      <p1 x="280" y="280"/>
+      <p2 x="280" y="540"/>
+    </wire>
+    <wire>
+      <p1 x="540" y="640"/>
+      <p2 x="540" y="740"/>
+    </wire>
+    <wire>
+      <p1 x="-160" y="320"/>
+      <p2 x="-160" y="600"/>
+    </wire>
+    <wire>
+      <p1 x="-160" y="40"/>
+      <p2 x="-160" y="140"/>
+    </wire>
+    <wire>
+      <p1 x="-1440" y="240"/>
+      <p2 x="-1440" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="-1440" y="-720"/>
+      <p2 x="-1440" y="-180"/>
+    </wire>
+    <wire>
+      <p1 x="800" y="200"/>
+      <p2 x="800" y="420"/>
+    </wire>
+    <wire>
+      <p1 x="-1060" y="240"/>
+      <p2 x="-1060" y="600"/>
+    </wire>
+    <wire>
+      <p1 x="-680" y="0"/>
+      <p2 x="-680" y="80"/>
+    </wire>
+    <wire>
+      <p1 x="-2220" y="-700"/>
+      <p2 x="-2220" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="-1580" y="-120"/>
+      <p2 x="-1580" y="-80"/>
+    </wire>
+    <wire>
+      <p1 x="2220" y="260"/>
+      <p2 x="2220" y="740"/>
+    </wire>
+    <wire>
+      <p1 x="300" y="240"/>
+      <p2 x="300" y="440"/>
+    </wire>
+    <wire>
+      <p1 x="-560" y="-720"/>
+      <p2 x="-560" y="-480"/>
+    </wire>
+    <wire>
+      <p1 x="-560" y="-480"/>
+      <p2 x="-560" y="40"/>
+    </wire>
+    <wire>
+      <p1 x="1840" y="-20"/>
+      <p2 x="1840" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="-180" y="300"/>
+      <p2 x="-180" y="580"/>
+    </wire>
+    <wire>
+      <p1 x="-180" y="60"/>
+      <p2 x="-180" y="160"/>
+    </wire>
+    <wire>
+      <p1 x="-1460" y="-100"/>
+      <p2 x="-1460" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="-1080" y="260"/>
+      <p2 x="-1080" y="620"/>
+    </wire>
+    <wire>
+      <p1 x="-1080" y="-440"/>
+      <p2 x="-1080" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-440" y="-280"/>
+      <p2 x="-440" y="-240"/>
+    </wire>
+    <wire>
+      <p1 x="-1720" y="360"/>
+      <p2 x="-1720" y="440"/>
+    </wire>
+    <wire>
+      <p1 x="440" y="-20"/>
+      <p2 x="440" y="60"/>
+    </wire>
+    <wire>
+      <p1 x="440" y="60"/>
+      <p2 x="440" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="-1980" y="0"/>
+      <p2 x="-1980" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="-700" y="-220"/>
+      <p2 x="-700" y="-200"/>
+    </wire>
+    <wire>
+      <p1 x="-700" y="-680"/>
+      <p2 x="-700" y="-380"/>
+    </wire>
+    <wire>
+      <p1 x="-700" y="-380"/>
+      <p2 x="-700" y="-320"/>
+    </wire>
+    <wire>
+      <p1 x="-960" y="100"/>
+      <p2 x="-960" y="460"/>
+    </wire>
+    <wire>
+      <p1 x="-960" y="-580"/>
+      <p2 x="-960" y="-520"/>
+    </wire>
+    <wire>
+      <p1 x="-320" y="-280"/>
+      <p2 x="-320" y="-140"/>
+    </wire>
+    <wire>
+      <p1 x="-1600" y="-240"/>
+      <p2 x="-1600" y="-200"/>
+    </wire>
+    <wire>
+      <p1 x="2240" y="180"/>
+      <p2 x="2240" y="660"/>
+    </wire>
+    <wire>
+      <p1 x="2240" y="660"/>
+      <p2 x="2240" y="760"/>
+    </wire>
+    <wire>
+      <p1 x="320" y="220"/>
+      <p2 x="320" y="420"/>
+    </wire>
+    <wire>
+      <p1 x="-580" y="260"/>
+      <p2 x="-580" y="280"/>
+    </wire>
+    <wire>
+      <p1 x="-580" y="200"/>
+      <p2 x="-580" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="-580" y="-660"/>
+      <p2 x="-580" y="-180"/>
+    </wire>
+    <wire>
+      <p1 x="-580" y="280"/>
+      <p2 x="-580" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="1860" y="260"/>
+      <p2 x="1860" y="620"/>
+    </wire>
+    <wire>
+      <p1 x="-200" y="280"/>
+      <p2 x="-200" y="560"/>
+    </wire>
+    <wire>
+      <p1 x="-200" y="80"/>
+      <p2 x="-200" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="-2120" y="-680"/>
+      <p2 x="-2120" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="-1480" y="-220"/>
+      <p2 x="-1480" y="-180"/>
+    </wire>
+    <wire>
+      <p1 x="200" y="380"/>
+      <p2 x="200" y="700"/>
+    </wire>
+    <wire>
+      <p1 x="-1740" y="160"/>
+      <p2 x="-1740" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-1740" y="320"/>
+      <p2 x="-1740" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="-1740" y="340"/>
+      <p2 x="-1740" y="460"/>
+    </wire>
+    <wire>
+      <p1 x="-1100" y="-460"/>
+      <p2 x="-1100" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="-460" y="-620"/>
+      <p2 x="-460" y="-360"/>
+    </wire>
+    <wire>
+      <p1 x="460" y="100"/>
+      <p2 x="460" y="300"/>
+    </wire>
+    <wire>
+      <p1 x="460" y="300"/>
+      <p2 x="460" y="800"/>
+    </wire>
+    <wire>
+      <p1 x="1740" y="200"/>
+      <p2 x="1740" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="1360" y="300"/>
+      <p2 x="1360" y="840"/>
+    </wire>
+    <wire>
+      <p1 x="-980" y="160"/>
+      <p2 x="-980" y="500"/>
+    </wire>
+    <wire>
+      <p1 x="-980" y="60"/>
+      <p2 x="-980" y="140"/>
+    </wire>
+    <wire>
+      <p1 x="-980" y="-600"/>
+      <p2 x="-980" y="-500"/>
+    </wire>
+    <wire>
+      <p1 x="-340" y="-640"/>
+      <p2 x="-340" y="-360"/>
+    </wire>
+    <wire>
+      <p1 x="980" y="-700"/>
+      <p2 x="980" y="100"/>
+    </wire>
+    <wire>
+      <p1 x="980" y="240"/>
+      <p2 x="980" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="980" y="100"/>
+      <p2 x="980" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="340" y="120"/>
+      <p2 x="340" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="340" y="260"/>
+      <p2 x="340" y="400"/>
+    </wire>
+    <wire>
+      <p1 x="-600" y="-120"/>
+      <p2 x="-600" y="60"/>
+    </wire>
+    <wire>
+      <p1 x="1880" y="280"/>
+      <p2 x="1880" y="640"/>
+    </wire>
+    <wire>
+      <p1 x="2520" y="220"/>
+      <p2 x="2520" y="240"/>
+    </wire>
+    <wire>
+      <p1 x="2520" y="240"/>
+      <p2 x="2520" y="800"/>
+    </wire>
+    <wire>
+      <p1 x="-220" y="260"/>
+      <p2 x="-220" y="540"/>
+    </wire>
+    <wire>
+      <p1 x="-220" y="140"/>
+      <p2 x="-220" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="-1500" y="-80"/>
+      <p2 x="-1500" y="200"/>
+    </wire>
+    <wire>
+      <p1 x="220" y="-580"/>
+      <p2 x="220" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="220" y="360"/>
+      <p2 x="220" y="680"/>
+    </wire>
+    <wire>
+      <p1 x="-480" y="-280"/>
+      <p2 x="-480" y="-160"/>
+    </wire>
+    <wire>
+      <p1 x="480" y="580"/>
+      <p2 x="480" y="860"/>
+    </wire>
+    <wire>
+      <p1 x="480" y="120"/>
+      <p2 x="480" y="520"/>
+    </wire>
+    <wire>
+      <p1 x="1380" y="-20"/>
+      <p2 x="1380" y="180"/>
+    </wire>
+    <wire>
+      <p1 x="1380" y="280"/>
+      <p2 x="1380" y="640"/>
+    </wire>
+    <wire>
+      <p1 x="-1000" y="180"/>
+      <p2 x="-1000" y="540"/>
+    </wire>
+    <wire>
+      <p1 x="-1000" y="-300"/>
+      <p2 x="-1000" y="-220"/>
+    </wire>
+    <wire>
+      <p1 x="-360" y="-260"/>
+      <p2 x="-360" y="-240"/>
+    </wire>
+    <wire>
+      <p1 x="-2280" y="-720"/>
+      <p2 x="-2280" y="440"/>
+    </wire>
+    <wire>
+      <p1 x="1000" y="260"/>
+      <p2 x="1000" y="660"/>
+    </wire>
+    <wire>
+      <p1 x="360" y="200"/>
+      <p2 x="360" y="360"/>
+    </wire>
+    <wire>
+      <p1 x="-620" y="460"/>
+      <p2 x="-620" y="500"/>
+    </wire>
+    <wire>
+      <p1 x="-620" y="-100"/>
+      <p2 x="-620" y="80"/>
+    </wire>
+    <wire>
+      <p1 x="-240" y="240"/>
+      <p2 x="-240" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="-240" y="200"/>
+      <p2 x="-240" y="220"/>
+    </wire>
+    <wire>
+      <p1 x="-880" y="260"/>
+      <p2 x="-880" y="740"/>
+    </wire>
+    <wire>
+      <p1 x="-2160" y="-620"/>
+      <p2 x="-2160" y="-360"/>
+    </wire>
+    <wire>
+      <p1 x="240" y="-600"/>
+      <p2 x="240" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="240" y="340"/>
+      <p2 x="240" y="660"/>
+    </wire>
+    <wire>
+      <p1 x="880" y="520"/>
+      <p2 x="880" y="540"/>
+    </wire>
+    <wire>
+      <p1 x="-500" y="440"/>
+      <p2 x="-500" y="500"/>
+    </wire>
+    <wire>
+      <p1 x="500" y="600"/>
+      <p2 x="500" y="840"/>
+    </wire>
+    <wire>
+      <p1 x="500" y="320"/>
+      <p2 x="500" y="500"/>
+    </wire>
+    <wire>
+      <p1 x="1780" y="220"/>
+      <p2 x="1780" y="260"/>
+    </wire>
+    <wire>
+      <p1 x="-120" y="360"/>
+      <p2 x="-120" y="420"/>
+    </wire>
+    <wire>
+      <p1 x="1400" y="260"/>
+      <p2 x="1400" y="620"/>
+    </wire>
+    <wire>
+      <p1 x="1400" y="620"/>
+      <p2 x="1400" y="860"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="200"/>
+      <p2 x="-1020" y="320"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="-380"/>
+      <p2 x="-1020" y="-200"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="-180"/>
+      <p2 x="-1020" y="-20"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="320"/>
+      <p2 x="-1020" y="560"/>
+    </wire>
+    <wire>
+      <p1 x="-1020" y="-20"/>
+      <p2 x="-1020" y="160"/>
+    </wire>
+    <wire>
+      <p1 x="1020" y="280"/>
+      <p2 x="1020" y="680"/>
+    </wire>
+    <wire>
+      <p1 x="380" y="160"/>
+      <p2 x="380" y="340"/>
+    </wire>
+    <wire>
+      <p1 x="-640" y="-80"/>
+      <p2 x="-640" y="100"/>
+    </wire>
+  </wires>
+  <measurementOrdering/>
+</circuit>
