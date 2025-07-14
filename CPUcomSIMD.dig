@@ -1381,16 +1381,16 @@ begin
                 if Funct3(2) = &apos;0&apos; then
                     case Funct3(1 downto 0) is
                         when &quot;00&quot; =&gt; for i in 0 to 7 loop shift_res(i*4+3 downto i*4) := std_logic_vector(shift_left(unsigned(A(i*4+3 downto i*4)), to_integer(unsigned(B(i*4+3 downto i*4))) )); end loop;
-                        when &quot;01&quot; =&gt; for i in 0 to 3 loop shift_res(i*8+7 downto i*8) := std_logic_vector(shift_left(unsigned(A(i*8+7 downto i*8)), to_integer(unsigned(B(i*8+7 downto i*8))) )); end loop;
-                        when &quot;10&quot; =&gt; for i in 0 to 1 loop shift_res(i*16+15 downto i*16) := std_logic_vector(shift_left(unsigned(A(i*16+15 downto i*16)), to_integer(unsigned(B(i*16+15 downto i*16))) )); end loop;
+                        when &quot;01&quot; =&gt; for i in 0 to 3 loop shift_res(i*8+7 downto i*8) := std_logic_vector(shift_left(unsigned(A(i*8+7 downto i*8)), to_integer(unsigned(B(i*8+4 downto i*8))) )); end loop;
+                        when &quot;10&quot; =&gt; for i in 0 to 1 loop shift_res(i*16+15 downto i*16) := std_logic_vector(shift_left(unsigned(A(i*16+15 downto i*16)), to_integer(unsigned(B(i*16+4 downto i*16))) )); end loop;
                         when &quot;11&quot; =&gt; shift_res := std_logic_vector(shift_left(unsigned(A), shift_amt));
                         when others =&gt; shift_res := (others =&gt; &apos;X&apos;);
                     end case;
                 else
                     case Funct3(1 downto 0) is
                         when &quot;00&quot; =&gt; for i in 0 to 7 loop shift_res(i*4+3 downto i*4) := std_logic_vector(shift_right(unsigned(A(i*4+3 downto i*4)), to_integer(unsigned(B(i*4+3 downto i*4))) )); end loop;
-                        when &quot;01&quot; =&gt; for i in 0 to 3 loop shift_res(i*8+7 downto i*8) := std_logic_vector(shift_right(unsigned(A(i*8+7 downto i*8)), to_integer(unsigned(B(i*8+7 downto i*8))) )); end loop;
-                        when &quot;10&quot; =&gt; for i in 0 to 1 loop shift_res(i*16+15 downto i*16) := std_logic_vector(shift_right(unsigned(A(i*16+15 downto i*16)), to_integer(unsigned(B(i*16+15 downto i*16))) )); end loop;
+                        when &quot;01&quot; =&gt; for i in 0 to 3 loop shift_res(i*8+7 downto i*8) := std_logic_vector(shift_right(unsigned(A(i*8+7 downto i*8)), to_integer(unsigned(B(i*8+4 downto i*8))) )); end loop;
+                        when &quot;10&quot; =&gt; for i in 0 to 1 loop shift_res(i*16+15 downto i*16) := std_logic_vector(shift_right(unsigned(A(i*16+15 downto i*16)), to_integer(unsigned(B(i*16+4 downto i*16))) )); end loop;
                         when &quot;11&quot; =&gt; shift_res := std_logic_vector(shift_right(unsigned(A), shift_amt));
                         when others =&gt; shift_res := (others =&gt; &apos;X&apos;);
                     end case;
@@ -1863,7 +1863,7 @@ end Behavioral;</string>
           <data>0,800093,40e113,417193,a14213,209293,100563,20d313,1020a3,3103b3
 ,417433,4164b3,414533,401105b3,619633,819563,62d6b3,102703,818363
 ,5*100993,311363,5*100993,1797,2837,6008ef,5*100993,c28967,5*100993
-,ffc08a13,a2a83,a8b33</data>
+,ffc08a13,a2a83,a8b33,0,100bf8,1b8c79</data>
         </entry>
       </elementAttributes>
       <pos x="-1520" y="340"/>
